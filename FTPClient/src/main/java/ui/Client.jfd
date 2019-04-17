@@ -1,0 +1,241 @@
+JFDML JFormDesigner: "6.0.6.2.195" Java: "1.8.0_152-release" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+			name: "mainPanel"
+			"background": new java.awt.Color( 255, 255, 255, 255 )
+			"inheritsPopupMenu": false
+			"minimumSize": new java.awt.Dimension( 400, 300 )
+			"preferredSize": new java.awt.Dimension( 500, 400 )
+			"visible": true
+			add( new FormContainer( "javax.swing.JTabbedPane", new FormLayoutManager( class javax.swing.JTabbedPane ) ) {
+				name: "tabbedPane1"
+				"background": new java.awt.Color( 255, 255, 255, 255 )
+				"focusable": true
+				"toolTipText": ""
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+					"$columnCount": 1
+					"$rowCount": 5
+				} ) {
+					name: "Download"
+					"background": new java.awt.Color( 255, 255, 255, 255 )
+					"enabled": true
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+						"$columnCount": 3
+						"$rowCount": 1
+					} ) {
+						name: "infoBar1"
+						"background": &Color0 new java.awt.Color( 234, 245, 255, 255 )
+						"foreground": &Color1 new java.awt.Color( 234, 245, 255, 255 )
+						"opaque": true
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "fileSize"
+							"foreground": &Color2 new java.awt.Color( 152, 181, 205, 255 )
+							"opaque": false
+							"text": "5MB"
+							"horizontalAlignment": 0
+						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+							"column": 2
+							"anchor": 2
+							"hSizePolicy": 0
+							"vSizePolicy": 0
+							"minimumSize": &Dimension0 new java.awt.Dimension( -1, 30 )
+							"preferredSize": &Dimension1 new java.awt.Dimension( 150, 30 )
+							"maximumSize": &Dimension2 new java.awt.Dimension( -1, 30 )
+						} )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "fileNumber"
+							"foreground": &Color3 new java.awt.Color( 152, 181, 205, 255 )
+							"opaque": false
+							"text": "8 files"
+							"horizontalAlignment": 0
+						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+							"column": 1
+							"anchor": 2
+							"fill": 1
+							"hSizePolicy": 0
+							"vSizePolicy": 0
+							"minimumSize": &Dimension3 new java.awt.Dimension( -1, 30 )
+							"preferredSize": &Dimension4 new java.awt.Dimension( 150, 30 )
+							"maximumSize": &Dimension5 new java.awt.Dimension( -1, 30 )
+						} )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "status"
+							"foreground": &Color4 new java.awt.Color( 152, 181, 205, 255 )
+							"opaque": false
+							"text": "downloading"
+							"horizontalAlignment": 0
+						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+							"anchor": 2
+							"fill": 1
+							"hSizePolicy": 0
+							"vSizePolicy": 0
+							"minimumSize": &Dimension6 new java.awt.Dimension( -1, 30 )
+							"preferredSize": &Dimension7 new java.awt.Dimension( 150, 30 )
+							"maximumSize": &Dimension8 new java.awt.Dimension( -1, 30 )
+						} )
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"row": 4
+						"fill": 3
+					} )
+					add( new FormComponent( "javax.swing.JList" ) {
+						name: "fileList1"
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"row": 3
+						"fill": 3
+						"hSizePolicy": 2
+						"vSizePolicy": 6
+						"preferredSize": new java.awt.Dimension( 150, 50 )
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+						"$columnCount": 1
+						"$rowCount": 1
+					} ) {
+						name: "filePath1"
+						"background": new java.awt.Color( 255, 255, 255, 255 )
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"rowSpan": 3
+						"fill": 3
+						"hSizePolicy": 0
+						"vSizePolicy": 0
+					} )
+				}, new FormLayoutConstraints( null ) {
+					"title": "Download"
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+					"$columnCount": 1
+					"$rowCount": 6
+				} ) {
+					name: "Upload"
+					"background": new java.awt.Color( 255, 255, 255, 255 )
+					add( new FormComponent( "javax.swing.JList" ) {
+						name: "fileList2"
+						"model": new javax.swing.DefaultListModel
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"row": 3
+						"fill": 3
+						"hSizePolicy": 2
+						"vSizePolicy": 6
+						"preferredSize": new java.awt.Dimension( 482, 50 )
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+						"$columnCount": 1
+						"$rowCount": 1
+					} ) {
+						name: "filePath2"
+						"background": new java.awt.Color( 255, 255, 255, 255 )
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"fill": 3
+						"preferredSize": new java.awt.Dimension( 24, 44 )
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+						"$columnCount": 3
+						"$rowCount": 3
+					} ) {
+						name: "fileChooser"
+						"background": new java.awt.Color( 255, 255, 255, 255 )
+						add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+							"$columnCount": 1
+							"$rowCount": 1
+						} ) {
+							name: "fileSelect"
+							"background": new java.awt.Color( 255, 255, 255, 255 )
+							"border": new javax.swing.border.TitledBorder( new javax.swing.border.LineBorder( new java.awt.Color( 152, 181, 205, 255 ), 1, false ), "" )
+							add( new FormComponent( "javax.swing.JTextPane" ) {
+								name: "addFilesOrDropTextPane"
+								"background": new java.awt.Color( 255, 255, 255, 255 )
+								"editable": false
+								"font": new com.jformdesigner.model.SwingDerivedFont( null, 0, 20, true )
+								"foreground": new java.awt.Color( 152, 181, 205, 255 )
+								"inheritsPopupMenu": false
+								"margin": new java.awt.Insets( 0, 0, 0, 0 )
+								"text": "Add files or drop files to upload"
+							}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+								"fill": 3
+								"hSizePolicy": 6
+								"vSizePolicy": 6
+								"preferredSize": new java.awt.Dimension( 150, 60 )
+							} )
+						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+							"column": 1
+							"row": 1
+							"fill": 3
+							"preferredSize": new java.awt.Dimension( 482, 50 )
+						} )
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"row": 1
+						"rowSpan": 2
+						"fill": 3
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.intellij.uiDesigner.core.GridLayoutManager ) {
+						"$columnCount": 3
+						"$rowCount": 1
+					} ) {
+						name: "infoBar2"
+						"background": #Color0
+						"foreground": #Color1
+						"opaque": true
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "fileSize2"
+							"foreground": #Color2
+							"opaque": false
+							"text": "5MB"
+							"horizontalAlignment": 0
+						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+							"column": 2
+							"anchor": 2
+							"hSizePolicy": 0
+							"vSizePolicy": 0
+							"minimumSize": #Dimension0
+							"preferredSize": #Dimension1
+							"maximumSize": #Dimension2
+						} )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "fileNumber2"
+							"foreground": #Color3
+							"opaque": false
+							"text": "8 files"
+							"horizontalAlignment": 0
+						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+							"column": 1
+							"anchor": 2
+							"fill": 1
+							"hSizePolicy": 0
+							"vSizePolicy": 0
+							"minimumSize": #Dimension3
+							"preferredSize": #Dimension4
+							"maximumSize": #Dimension5
+						} )
+						add( new FormComponent( "javax.swing.JLabel" ) {
+							name: "status2"
+							"foreground": #Color4
+							"opaque": false
+							"text": "downloading"
+							"horizontalAlignment": 0
+						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+							"anchor": 2
+							"fill": 1
+							"hSizePolicy": 0
+							"vSizePolicy": 0
+							"minimumSize": #Dimension6
+							"preferredSize": #Dimension7
+							"maximumSize": #Dimension8
+						} )
+					}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
+						"row": 5
+						"fill": 3
+					} )
+				}, new FormLayoutConstraints( null ) {
+					"title": "Upload"
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "Center"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 505, 500 )
+		} )
+	}
+}
