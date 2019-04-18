@@ -45,7 +45,7 @@
                 </properties>
                 <border type="none"/>
                 <children>
-                  <component id="77094" class="javax.swing.JTextArea" binding="fileSize">
+                  <component id="77094" class="javax.swing.JLabel" binding="fileSize">
                     <constraints>
                       <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="2" fill="0" indent="0" use-parent-layout="false">
                         <minimum-size width="-1" height="30"/>
@@ -60,7 +60,7 @@
                       <text value="5MB"/>
                     </properties>
                   </component>
-                  <component id="2a2de" class="javax.swing.JTextArea" binding="fileNumber">
+                  <component id="2a2de" class="javax.swing.JLabel" binding="fileNumber">
                     <constraints>
                       <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="2" fill="1" indent="0" use-parent-layout="false">
                         <minimum-size width="-1" height="30"/>
@@ -75,7 +75,7 @@
                       <text value="8 files"/>
                     </properties>
                   </component>
-                  <component id="ec2e9" class="javax.swing.JTextArea" binding="status">
+                  <component id="ec2e9" class="javax.swing.JLabel" binding="status">
                     <constraints>
                       <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="2" fill="1" indent="0" use-parent-layout="false">
                         <minimum-size width="-1" height="30"/>
@@ -231,7 +231,7 @@
                       <color color="-6769203"/>
                     </border>
                     <children>
-                      <component id="d4594" class="javax.swing.JTextPane" binding="addFilesOrDropTextPane" default-binding="true">
+                      <component id="d4594" class="javax.swing.JLabel" binding="addFilesOrDropTextPane" default-binding="true">
                         <constraints>
                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
                             <preferred-size width="150" height="60"/>

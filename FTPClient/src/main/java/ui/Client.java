@@ -3,6 +3,7 @@ package ui;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.plaf.*;
 import com.intellij.uiDesigner.core.*;
 
 /**
@@ -41,12 +42,13 @@ public class Client {
         status = new JLabel();
         fileList1 = new JList();
         filePath1 = new JPanel();
+        button1 = new JButton();
+        button2 = new JButton();
         Upload = new JPanel();
         fileList2 = new JList();
         filePath2 = new JPanel();
         fileChooser = new JPanel();
-        fileSelect = new JPanel();
-        addFilesOrDropTextPane = new JTextPane();
+        addFilesOrDropTextPane = new JLabel();
         infoBar2 = new JPanel();
         fileSize2 = new JLabel();
         fileNumber2 = new JLabel();
@@ -56,9 +58,11 @@ public class Client {
         {
             mainPanel.setBackground(Color.white);
             mainPanel.setInheritsPopupMenu(false);
-            mainPanel.setMinimumSize(new Dimension(400, 300));
-            mainPanel.setPreferredSize(new Dimension(500, 400));
+            mainPanel.setMinimumSize(new Dimension(600, 500));
+            mainPanel.setPreferredSize(new Dimension(600, 500));
             mainPanel.setVisible(true);
+            mainPanel.setForeground(Color.white);
+            mainPanel.setMaximumSize(new Dimension(-1, -1));
 
             // JFormDesigner evaluation mark
             mainPanel.setBorder(new javax.swing.border.CompoundBorder(
@@ -79,7 +83,11 @@ public class Client {
                 {
                     Download.setBackground(Color.white);
                     Download.setEnabled(true);
-                    Download.setLayout(new GridLayoutManager(5, 1, new Insets(0, 0, 0, 0), -1, -1));
+                    Download.setLayout(new GridBagLayout());
+                    ((GridBagLayout)Download.getLayout()).columnWidths = new int[] {0, 0};
+                    ((GridBagLayout)Download.getLayout()).rowHeights = new int[] {123, 0, 0, 0};
+                    ((GridBagLayout)Download.getLayout()).columnWeights = new double[] {0.01, 1.0E-4};
+                    ((GridBagLayout)Download.getLayout()).rowWeights = new double[] {0.0, 1.0, 0.0, 1.0E-4};
 
                     //======== infoBar1 ========
                     {
@@ -121,34 +129,54 @@ public class Client {
                             GridConstraints.SIZEPOLICY_FIXED,
                             null, new Dimension(150, 30), null));
                     }
-                    Download.add(infoBar1, new GridConstraints(4, 0, 1, 1,
-                        GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
-                        GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-                        GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-                        null, null, null));
-                    Download.add(fileList1, new GridConstraints(3, 0, 1, 1,
-                        GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
-                        GridConstraints.SIZEPOLICY_CAN_GROW,
-                        GridConstraints.SIZEPOLICY_CAN_GROW | GridConstraints.SIZEPOLICY_WANT_GROW,
-                        null, new Dimension(150, 50), null));
+                    Download.add(infoBar1, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 0, 0), 0, 0));
+                    Download.add(fileList1, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 5, 0), 0, 0));
 
                     //======== filePath1 ========
                     {
                         filePath1.setBackground(Color.white);
-                        filePath1.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+                        filePath1.setLayout(new GridBagLayout());
+                        ((GridBagLayout)filePath1.getLayout()).columnWidths = new int[] {83, 50, 0, 0, 0, 0};
+                        ((GridBagLayout)filePath1.getLayout()).rowHeights = new int[] {0, 0};
+                        ((GridBagLayout)filePath1.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4};
+                        ((GridBagLayout)filePath1.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
+
+                        //---- button1 ----
+                        button1.setBackground(Color.white);
+                        button1.setIcon(new ImageIcon("/Users/yiner/Desktop/\u5927\u4e09\u4e0b/\u4e13\u4e1a\u8bfe/Notes/\u7f51\u7edc\u7ba1\u7406\u5b9e\u9a8c/\u5b9e\u9a8c/ftpclient/FTPClient/src/main/resources/ui/icon/leftRorrow.png"));
+                        button1.setBorder(null);
+                        filePath1.add(button1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                            new Insets(0, 0, 0, 10), 0, 0));
+
+                        //---- button2 ----
+                        button2.setBackground(Color.white);
+                        button2.setIcon(new ImageIcon("/Users/yiner/Desktop/\u5927\u4e09\u4e0b/\u4e13\u4e1a\u8bfe/Notes/\u7f51\u7edc\u7ba1\u7406\u5b9e\u9a8c/\u5b9e\u9a8c/ftpclient/FTPClient/src/main/resources/ui/icon/folder.png"));
+                        button2.setBorder(null);
+                        button2.setText("/");
+                        button2.setForeground(new Color(152, 181, 205));
+                        filePath1.add(button2, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.VERTICAL,
+                            new Insets(0, 0, 0, 10), 0, 0));
                     }
-                    Download.add(filePath1, new GridConstraints(0, 0, 3, 1,
-                        GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
-                        GridConstraints.SIZEPOLICY_FIXED,
-                        GridConstraints.SIZEPOLICY_FIXED,
-                        null, null, null));
+                    Download.add(filePath1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 5, 0), 0, 0));
                 }
                 tabbedPane1.addTab("Download", Download);
 
                 //======== Upload ========
                 {
                     Upload.setBackground(Color.white);
-                    Upload.setLayout(new GridLayoutManager(6, 1, new Insets(0, 0, 0, 0), -1, -1));
+                    Upload.setLayout(new GridBagLayout());
+                    ((GridBagLayout)Upload.getLayout()).columnWidths = new int[] {0, 0};
+                    ((GridBagLayout)Upload.getLayout()).rowHeights = new int[] {65, 0, 127, 205, 0, 0};
+                    ((GridBagLayout)Upload.getLayout()).columnWeights = new double[] {0.01, 1.0E-4};
+                    ((GridBagLayout)Upload.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 1.0, 0.0, 1.0E-4};
 
                     //---- fileList2 ----
                     fileList2.setModel(new AbstractListModel() {
@@ -158,59 +186,41 @@ public class Client {
                         public int getSize() { return values.length; }
                         public Object getElementAt(int i) { return values[i]; }
                     });
-                    Upload.add(fileList2, new GridConstraints(3, 0, 1, 1,
-                        GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
-                        GridConstraints.SIZEPOLICY_CAN_GROW,
-                        GridConstraints.SIZEPOLICY_CAN_GROW | GridConstraints.SIZEPOLICY_WANT_GROW,
-                        null, new Dimension(482, 50), null));
+                    Upload.add(fileList2, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 5, 0), 0, 0));
 
                     //======== filePath2 ========
                     {
                         filePath2.setBackground(Color.white);
                         filePath2.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
                     }
-                    Upload.add(filePath2, new GridConstraints(0, 0, 1, 1,
-                        GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
-                        GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-                        GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-                        null, new Dimension(24, 44), null));
+                    Upload.add(filePath2, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 5, 0), 0, 0));
 
                     //======== fileChooser ========
                     {
                         fileChooser.setBackground(Color.white);
                         fileChooser.setLayout(new GridLayoutManager(3, 3, new Insets(0, 0, 0, 0), -1, -1));
 
-                        //======== fileSelect ========
-                        {
-                            fileSelect.setBackground(Color.white);
-                            fileSelect.setBorder(new TitledBorder(new LineBorder(new Color(152, 181, 205)), ""));
-                            fileSelect.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-
-                            //---- addFilesOrDropTextPane ----
-                            addFilesOrDropTextPane.setBackground(Color.white);
-                            addFilesOrDropTextPane.setEditable(false);
-                            addFilesOrDropTextPane.setFont(addFilesOrDropTextPane.getFont().deriveFont(20f));
-                            addFilesOrDropTextPane.setForeground(new Color(152, 181, 205));
-                            addFilesOrDropTextPane.setInheritsPopupMenu(false);
-                            addFilesOrDropTextPane.setMargin(new Insets(0, 0, 0, 0));
-                            addFilesOrDropTextPane.setText("Add files or drop files to upload");
-                            fileSelect.add(addFilesOrDropTextPane, new GridConstraints(0, 0, 1, 1,
-                                GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
-                                GridConstraints.SIZEPOLICY_CAN_GROW | GridConstraints.SIZEPOLICY_WANT_GROW,
-                                GridConstraints.SIZEPOLICY_CAN_GROW | GridConstraints.SIZEPOLICY_WANT_GROW,
-                                null, new Dimension(150, 60), null));
-                        }
-                        fileChooser.add(fileSelect, new GridConstraints(1, 1, 1, 1,
+                        //---- addFilesOrDropTextPane ----
+                        addFilesOrDropTextPane.setBackground(Color.white);
+                        addFilesOrDropTextPane.setFont(addFilesOrDropTextPane.getFont().deriveFont(20f));
+                        addFilesOrDropTextPane.setForeground(new Color(152, 181, 205));
+                        addFilesOrDropTextPane.setInheritsPopupMenu(false);
+                        addFilesOrDropTextPane.setText("Add files or drop files to upload");
+                        addFilesOrDropTextPane.setHorizontalAlignment(SwingConstants.CENTER);
+                        addFilesOrDropTextPane.setBorder(new LineBorder(new Color(152, 181, 205), 3, true));
+                        fileChooser.add(addFilesOrDropTextPane, new GridConstraints(1, 1, 1, 1,
                             GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
-                            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-                            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-                            null, new Dimension(482, 50), null));
+                            GridConstraints.SIZEPOLICY_CAN_GROW | GridConstraints.SIZEPOLICY_WANT_GROW,
+                            GridConstraints.SIZEPOLICY_FIXED,
+                            null, new Dimension(150, 60), null));
                     }
-                    Upload.add(fileChooser, new GridConstraints(1, 0, 2, 1,
-                        GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
-                        GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-                        GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-                        null, null, null));
+                    Upload.add(fileChooser, new GridBagConstraints(0, 1, 1, 2, 0.0, 0.0,
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 5, 0), 0, 0));
 
                     //======== infoBar2 ========
                     {
@@ -252,11 +262,9 @@ public class Client {
                             GridConstraints.SIZEPOLICY_FIXED,
                             null, new Dimension(150, 30), null));
                     }
-                    Upload.add(infoBar2, new GridConstraints(5, 0, 1, 1,
-                        GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
-                        GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-                        GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-                        null, null, null));
+                    Upload.add(infoBar2, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0,
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 0, 0), 0, 0));
                 }
                 tabbedPane1.addTab("Upload", Upload);
             }
@@ -276,12 +284,13 @@ public class Client {
     private JLabel status;
     private JList fileList1;
     private JPanel filePath1;
+    private JButton button1;
+    private JButton button2;
     private JPanel Upload;
     private JList fileList2;
     private JPanel filePath2;
     private JPanel fileChooser;
-    private JPanel fileSelect;
-    private JTextPane addFilesOrDropTextPane;
+    private JLabel addFilesOrDropTextPane;
     private JPanel infoBar2;
     private JLabel fileSize2;
     private JLabel fileNumber2;
