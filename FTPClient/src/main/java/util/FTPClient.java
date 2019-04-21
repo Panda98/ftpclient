@@ -12,6 +12,8 @@ public class FTPClient {
     private BufferedReader reader;
     private PrintWriter writer;
 
+    private BufferedOutputStream outputStream;
+
     private Socket dataSocket;
     private String dataHost;
     private int dataPort;
@@ -45,6 +47,7 @@ public class FTPClient {
         System.out.println(response);
 
         if(!response.startsWith("331 ")){
+            socket = null;
             throw new Exception("用户名不正确！");
         }
         writer.println("PASS "+password);
@@ -52,6 +55,7 @@ public class FTPClient {
         response = reader.readLine();
         System.out.println(response);
         if(!response.startsWith("230 ")){
+            socket = null;
             throw new Exception("密码错误！");
         }
 
@@ -117,6 +121,8 @@ public class FTPClient {
                 reader.close();
             if(writer != null)
                 writer.close();
+            if(outputStream != null)
+                outputStream.close();
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -156,7 +162,7 @@ public class FTPClient {
 
         calDataHostPort();
 
-        int length = 0;
+        long length = 0;
         writer.println("SIZE "+serverpath);
         writer.flush();
         String response = reader.readLine();
@@ -210,13 +216,16 @@ public class FTPClient {
         dataSocket.close();
     }
 
+    static boolean isFirst = true;
     /**
      * 上传文件
      * @param localpath 文件的本地地址
      * @param serverpath 服务器上的地址
      * @throws Exception 读写错误
      */
-    public synchronized void upload(String localpath,String serverpath) throws Exception{
+    public void upload(String localpath,String serverpath,Object lock) throws Exception{
+
+
         calDataHostPort();
 
         writer.println("SIZE "+serverpath);
@@ -239,19 +248,27 @@ public class FTPClient {
         dataSocket = new Socket(dataHost,dataPort);
 
         File file = new File(localpath);
+        long length = file.length();
         RandomAccessFile randomAccessFile = new RandomAccessFile(file,"r");
         randomAccessFile.seek(size);
 
-        BufferedOutputStream outputStream = new BufferedOutputStream(dataSocket.getOutputStream());
-//        inputStream = new BufferedInputStream(new FileInputStream());
+        outputStream = new BufferedOutputStream(dataSocket.getOutputStream());
 
         byte[] buffer = new byte[4096];
         int bytesRead = 0;
+        int already = size;
         while ((bytesRead = randomAccessFile.read(buffer))!=-1){
             outputStream.write(buffer,0,bytesRead);
+            already += bytesRead;
+            synchronized (lock) {
+                progress = (double) already / length;
+            }
+            outputStream.flush();
+            return;
+
         }
-        outputStream.flush();
-        outputStream.close();
+        randomAccessFile.close();
+//        outputStream.close();
 //        inputStream.close();
         dataSocket.close();
     }

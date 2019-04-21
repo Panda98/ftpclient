@@ -19,8 +19,8 @@ public class Main {
             client2 = new FTPClient();
             String host = "192.168.2.7";
             int port = 21;
-            String username = "810650217@qq.com";
-            String password = "pyy19980118";
+            String username = "Experiment";
+            String password = "123456";
             try {
                 client.connect(host, port, username, password);
                 client2.connect(host, port, username, password);
@@ -47,7 +47,7 @@ public class Main {
             try{
 //            client.upload("C:\\Users\\Pan\\Desktop\\hello.txt","test\\hello.txt");
 //            client.list("/");
-                client.download(localpath,serverpath,c);
+                client.upload(localpath,serverpath,c);
             }catch (Exception e){
                 e.printStackTrace();
             }finally {
