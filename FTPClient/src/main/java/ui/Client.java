@@ -564,7 +564,7 @@ public class Client {
             //---- textFieldName ----
             this.textFieldName.setPreferredSize(new Dimension(90, 28));
             this.textFieldName.setMinimumSize(new Dimension(90, 28));
-            this.textFieldName.setText("810650217@qq.com");
+            this.textFieldName.setText("Experiment");
             this.panel1.add(this.textFieldName, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 new Insets(0, 10, 5, 15), 0, 0));
@@ -578,7 +578,7 @@ public class Client {
             //---- passwordField ----
             this.passwordField.setMinimumSize(new Dimension(90, 28));
             this.passwordField.setPreferredSize(new Dimension(90, 28));
-            this.passwordField.setText("pyy19980118");
+            this.passwordField.setText("123456");
             this.panel1.add(this.passwordField, new GridBagConstraints(3, 2, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 new Insets(0, 10, 5, 10), 0, 0));

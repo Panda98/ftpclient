@@ -402,7 +402,7 @@ new FormModel {
 				name: "textFieldName"
 				"preferredSize": new java.awt.Dimension( 90, 28 )
 				"minimumSize": new java.awt.Dimension( 90, 28 )
-				"text": "810650217@qq.com"
+				"text": "Experiment"
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
 				"gridy": 2
 				"hAlign": 0
@@ -423,7 +423,7 @@ new FormModel {
 				name: "passwordField"
 				"minimumSize": new java.awt.Dimension( 90, 28 )
 				"preferredSize": new java.awt.Dimension( 90, 28 )
-				"text": "pyy19980118"
+				"text": "123456"
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
 				"gridx": 3
 				"gridy": 2
