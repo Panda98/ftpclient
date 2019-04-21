@@ -96,7 +96,7 @@ new FormModel {
 						"foreground": &Color4 new java.awt.Color( 234, 245, 255, 255 )
 						"opaque": true
 						add( new FormComponent( "javax.swing.JLabel" ) {
-							name: "fileSize"
+							name: "fileSize1"
 							"foreground": &Color5 new java.awt.Color( 152, 181, 205, 255 )
 							"opaque": false
 							"text": "5MB"
@@ -111,10 +111,10 @@ new FormModel {
 							"maximumSize": &Dimension9 new java.awt.Dimension( -1, 30 )
 						} )
 						add( new FormComponent( "javax.swing.JLabel" ) {
-							name: "fileNumber"
+							name: "fileNumber1"
 							"foreground": &Color6 new java.awt.Color( 152, 181, 205, 255 )
 							"opaque": false
-							"text": "8 files"
+							"text": "0个文件"
 							"horizontalAlignment": 0
 						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 							"column": 1
@@ -127,10 +127,10 @@ new FormModel {
 							"maximumSize": &Dimension12 new java.awt.Dimension( -1, 30 )
 						} )
 						add( new FormComponent( "javax.swing.JLabel" ) {
-							name: "status"
+							name: "status1"
 							"foreground": &Color7 new java.awt.Color( 152, 181, 205, 255 )
 							"opaque": false
-							"text": "downloading"
+							"text": "未连接"
 							"horizontalAlignment": 0
 						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 							"anchor": 2
@@ -226,7 +226,7 @@ new FormModel {
 							name: "fileNumber2"
 							"foreground": #Color6
 							"opaque": false
-							"text": "8 files"
+							"text": "0个文件"
 							"horizontalAlignment": 0
 						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 							"column": 1
@@ -242,7 +242,7 @@ new FormModel {
 							name: "status2"
 							"foreground": #Color7
 							"opaque": false
-							"text": "downloading"
+							"text": "未连接"
 							"horizontalAlignment": 0
 						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 							"anchor": 2
@@ -330,164 +330,154 @@ new FormModel {
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 525, 40 )
 		} )
-		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class java.awt.GridLayout ) ) {
-			name: "frameConn"
+		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridBagLayout ) {
+			"$columnSpecs": "60, 90, 45, 94"
+			"$rowSpecs": "50, 60, 60, 40"
+			"$hGap": 5
+			"$vGap": 5
+			"$alignLeft": true
+			"$alignTop": true
+		} ) {
+			name: "panel1"
 			"background": &ColorUIResource0 new javax.swing.plaf.ColorUIResource( 255, 255, 255 )
-			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridBagLayout ) {
-				"$columnSpecs": "60, 90, 45, 94"
-				"$rowSpecs": "50, 60, 60, 40"
-				"$hGap": 5
-				"$vGap": 5
-				"$alignLeft": true
-				"$alignTop": true
-			} ) {
-				name: "panel1"
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "labelConn"
+				"text": "连接服务器"
+				"horizontalAlignment": 0
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+				"gridwidth": 4
+				"hAlign": 0
+				"vAlign": 0
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "labelHost"
+				"text": "主机"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+				"gridy": 1
+				"hAlign": 4
+				"vAlign": 0
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "textFieldHost"
+				"preferredSize": new java.awt.Dimension( 80, 28 )
+				"minimumSize": &Dimension16 new java.awt.Dimension( 80, 28 )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+				"gridx": 1
+				"gridy": 1
+				"hAlign": 0
+				"vAlign": 0
+				"insets": new java.awt.Insets( 0, 10, 0, 10 )
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "labelPort"
+				"text": "端口"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+				"gridx": 2
+				"gridy": 1
+				"hAlign": 4
+				"vAlign": 0
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "textFieldPort"
+				"preferredSize": new java.awt.Dimension( 80, 28 )
+				"minimumSize": #Dimension16
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+				"gridy": 1
+				"hAlign": 0
+				"vAlign": 0
+				"gridx": 3
+				"insets": new java.awt.Insets( 0, 10, 0, 10 )
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "labelName"
+				"text": "用户名"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+				"gridy": 2
+				"hAlign": 4
+				"vAlign": 0
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "textFieldName"
+				"preferredSize": new java.awt.Dimension( 80, 28 )
+				"minimumSize": #Dimension16
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+				"gridy": 2
+				"hAlign": 0
+				"vAlign": 0
+				"gridx": 1
+				"insets": new java.awt.Insets( 0, 10, 0, 10 )
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "labelPwd"
+				"text": "密码"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+				"gridx": 2
+				"gridy": 2
+				"hAlign": 4
+				"vAlign": 0
+			} )
+			add( new FormComponent( "javax.swing.JPasswordField" ) {
+				name: "passwordField"
+				"minimumSize": new java.awt.Dimension( 80, 28 )
+				"preferredSize": new java.awt.Dimension( 80, 28 )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+				"gridx": 3
+				"gridy": 2
+				"hAlign": 0
+				"vAlign": 0
+				"insets": new java.awt.Insets( 0, 10, 0, 10 )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "buttonConn"
+				"text": "连接"
 				"background": #ColorUIResource0
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "labelConn"
-					"text": "连接服务器"
-					"horizontalAlignment": 0
-				}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
-					"gridwidth": 4
-					"hAlign": 0
-					"vAlign": 0
-				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "labelHost"
-					"text": "主机"
-				}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
-					"gridy": 1
-					"hAlign": 4
-					"vAlign": 0
-				} )
-				add( new FormComponent( "javax.swing.JTextField" ) {
-					name: "textFieldHost"
-					"preferredSize": new java.awt.Dimension( 80, 28 )
-					"minimumSize": &Dimension16 new java.awt.Dimension( 80, 28 )
-				}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
-					"gridx": 1
-					"gridy": 1
-					"hAlign": 0
-					"vAlign": 0
-					"insets": new java.awt.Insets( 0, 10, 0, 10 )
-				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "labelPort"
-					"text": "端口"
-				}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
-					"gridx": 2
-					"gridy": 1
-					"hAlign": 4
-					"vAlign": 0
-				} )
-				add( new FormComponent( "javax.swing.JTextField" ) {
-					name: "textFieldPort"
-					"preferredSize": new java.awt.Dimension( 80, 28 )
-					"minimumSize": #Dimension16
-				}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
-					"gridy": 1
-					"hAlign": 0
-					"vAlign": 0
-					"gridx": 3
-					"insets": new java.awt.Insets( 0, 10, 0, 10 )
-				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "labelName"
-					"text": "用户名"
-				}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
-					"gridy": 2
-					"hAlign": 4
-					"vAlign": 0
-				} )
-				add( new FormComponent( "javax.swing.JTextField" ) {
-					name: "textFieldName"
-					"preferredSize": new java.awt.Dimension( 80, 28 )
-					"minimumSize": #Dimension16
-				}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
-					"gridy": 2
-					"hAlign": 0
-					"vAlign": 0
-					"gridx": 1
-					"insets": new java.awt.Insets( 0, 10, 0, 10 )
-				} )
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "labelPwd"
-					"text": "密码"
-				}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
-					"gridx": 2
-					"gridy": 2
-					"hAlign": 4
-					"vAlign": 0
-				} )
-				add( new FormComponent( "javax.swing.JPasswordField" ) {
-					name: "passwordField"
-					"minimumSize": new java.awt.Dimension( 80, 28 )
-					"preferredSize": new java.awt.Dimension( 80, 28 )
-				}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
-					"gridx": 3
-					"gridy": 2
-					"hAlign": 0
-					"vAlign": 0
-					"insets": new java.awt.Insets( 0, 10, 0, 10 )
-				} )
-				add( new FormComponent( "javax.swing.JButton" ) {
-					name: "buttonConn"
-					"text": "连接"
-					"background": #ColorUIResource0
-					addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "buttonConnActionPerformed", true ) )
-				}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
-					"gridy": 3
-					"gridwidth": 4
-					"hAlign": 0
-					"vAlign": 0
-				} )
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "buttonConnActionPerformed", true ) )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+				"gridy": 3
+				"gridwidth": 4
+				"hAlign": 0
+				"vAlign": 0
 			} )
 		}, new FormLayoutConstraints( null ) {
-			"location": new java.awt.Point( 515, 105 )
-			"size": new java.awt.Dimension( 320, 260 )
+			"location": new java.awt.Point( 0, 546 )
+			"size": new java.awt.Dimension( 318, 236 )
 		} )
-		add( new FormWindow( "javax.swing.JDialog", new FormLayoutManager( class java.awt.GridLayout ) ) {
-			name: "dialog1"
+		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridBagLayout ) {
+			"$columnSpecs": "200"
+			"$rowSpecs": "44, 46, 40"
+			"$alignLeft": true
+			"$alignTop": true
+		} ) {
+			name: "panel2"
 			"background": #ColorUIResource0
-			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridBagLayout ) {
-				"$columnSpecs": "200"
-				"$rowSpecs": "44, 46, 40"
-				"$alignLeft": true
-				"$alignTop": true
-			} ) {
-				name: "panel2"
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label2"
+				"text": "提示"
+				"horizontalAlignment": 0
+				"font": new java.awt.Font( ".SF NS Text", 1, 18 )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "labelMsg"
+				"horizontalTextPosition": 0
+				"horizontalAlignment": 0
 				"background": #ColorUIResource0
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "label2"
-					"text": "提示"
-					"horizontalAlignment": 0
-					"font": new java.awt.Font( ".SF NS Text", 1, 18 )
-				}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) )
-				add( new FormComponent( "javax.swing.JLabel" ) {
-					name: "label1"
-					"text": "端口必须为整数！"
-					"horizontalTextPosition": 0
-					"horizontalAlignment": 0
-					"background": #ColorUIResource0
-				}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
-					"gridy": 1
-				} )
-				add( new FormComponent( "javax.swing.JButton" ) {
-					name: "buttonVerify"
-					"text": "确定"
-					"background": #ColorUIResource0
-					"opaque": false
-					addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "buttonVerifyActionPerformed", true ) )
-				}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
-					"gridy": 2
-					"hAlign": 0
-					"vAlign": 0
-					"ipadx": 5
-				} )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+				"gridy": 1
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "buttonVerify"
+				"text": "确定"
+				"background": #ColorUIResource0
+				"opaque": false
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+				"gridy": 2
+				"hAlign": 0
+				"vAlign": 0
+				"ipadx": 5
 			} )
 		}, new FormLayoutConstraints( null ) {
-			"location": new java.awt.Point( 555, 375 )
-			"size": new java.awt.Dimension( 200, 155 )
+			"location": new java.awt.Point( 375, 585 )
+			"size": new java.awt.Dimension( 198, 131 )
 		} )
 		addBindingGroup( new FormBindingGroup( class org.jdesktop.beansbinding.BindingGroup ) {
 			"name": "bindingGroup"

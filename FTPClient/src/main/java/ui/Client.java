@@ -21,7 +21,9 @@ import model.Connection;
  */
 public class Client {
 
-    private FTPClient client;
+    private FTPClient client = new FTPClient();
+
+    // connection
     private Connection connection;
 
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
@@ -44,11 +46,10 @@ public class Client {
         changeSupport.firePropertyChange("connection", oldConn, conn);
     }
 
+    // connection - end
+
     public Client() {
         initComponents();
-        client = new FTPClient();
-        connection = new Connection();
-
     }
 
     public static void main(String[] args) {
@@ -95,48 +96,74 @@ public class Client {
         client.close();
     }
 
+    private boolean isEmpty(String s) {
+        return  (s==null || s.equals(""));
+    }
+
+    class ConnectRun implements Runnable{
+        String host;
+        int port;
+        String username;
+        String pwd;
+        String msg = "";
+
+        public ConnectRun(String host, int port, String username, String pwd) {
+            this.host = host;
+            this.port = port;
+            this.username = username;
+            this.pwd = pwd;
+        }
+
+        public void run() {
+            try {
+                client.connect(host, port, username, pwd);
+                msg = "连接成功！";
+            } catch (Exception e) {
+                msg = e.getMessage();
+            }
+        }
+    }
+
     private void buttonConnActionPerformed(ActionEvent e) {
-        JDialog dialog = new JDialog();
-        dialog.setSize(200, 155);
-        dialog.setResizable(false);
-        dialog.setContentPane(new Client().panel2);
-        dialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-        // 窗口居中显示
-        int windowWidth = dialog.getWidth(); // 获得窗口宽
-        int windowHeight = dialog.getHeight(); // 获得窗口高
-        Toolkit kit = Toolkit.getDefaultToolkit(); // 定义工具包
-        Dimension screenSize = kit.getScreenSize(); // 获取屏幕的尺寸
-        int screenWidth = screenSize.width; // 获取屏幕的宽
-        int screenHeight = screenSize.height; // 获取屏幕的高
-        dialog.setLocation(screenWidth / 2 - windowWidth / 2,
-                screenHeight / 2 - windowHeight / 2 - 40); // 设置位置居中
+
+        boolean isRun = false;
+        ConnectRun runner = null;
+        String msg = null;
 
         try {
             String host = this.textFieldHost.getText();
-            int port = Integer.parseInt(this.textFieldPort.getText());
+            String portStr = this.textFieldPort.getText();
             String username = this.textFieldName.getText();
             String pwd = new String(this.passwordField.getPassword());
-            client.connect(host, port, username, pwd);
+
+            if (isEmpty(host) || isEmpty(portStr) || isEmpty(username) || isEmpty(pwd)) {
+                msg = "输入框不能为空！";
+                return;
+            }
+
+            int port = Integer.parseInt(portStr);
+
+            runner = new ConnectRun(host, port, username, pwd);
+            Thread thread = new Thread(runner);
+            thread.run();
+            isRun = true;
 
         } catch (NumberFormatException e1) {
-
-
-
-
-
-        } catch (Exception e2) {
+            msg = "端口必须为整数！";
 
         } finally {
-            dialog.pack();
-            dialog.setVisible(true);
+            if (isRun) {
+                msg = runner.msg;
+            }
+
+            JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
+            if (msg.equals("连接成功！")) {
+                Window window = SwingUtilities.getWindowAncestor(this.buttonConn);
+                window.dispose();
+                this.status1.setText("已连接");
+                this.status2.setText("已连接");
+            }
         }
-
-
-
-
-    }
-
-    private void buttonVerifyActionPerformed(ActionEvent e) {
 
     }
 
@@ -151,9 +178,9 @@ public class Client {
         this.buttonBack1 = new JButton();
         this.button2Root1 = new JButton();
         this.infoBar1 = new JPanel();
-        this.fileSize = new JLabel();
-        this.fileNumber = new JLabel();
-        this.status = new JLabel();
+        this.fileSize1 = new JLabel();
+        this.fileNumber1 = new JLabel();
+        this.status1 = new JLabel();
         this.fileList1 = new JList();
         this.Upload = new JPanel();
         this.fileList2 = new JList();
@@ -169,7 +196,6 @@ public class Client {
         this.popupMenu1 = new JPopupMenu();
         this.connect = new JMenuItem();
         this.disconnect = new JMenuItem();
-        this.frameConn = new JFrame();
         this.panel1 = new JPanel();
         this.labelConn = new JLabel();
         this.labelHost = new JLabel();
@@ -181,10 +207,9 @@ public class Client {
         this.labelPwd = new JLabel();
         this.passwordField = new JPasswordField();
         this.buttonConn = new JButton();
-        this.dialog1 = new JDialog();
         this.panel2 = new JPanel();
         this.label2 = new JLabel();
-        this.label1 = new JLabel();
+        this.labelMsg = new JLabel();
         this.buttonVerify = new JButton();
 
         //======== mainPanel ========
@@ -281,34 +306,34 @@ public class Client {
                         this.infoBar1.setOpaque(true);
                         this.infoBar1.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
 
-                        //---- fileSize ----
-                        this.fileSize.setForeground(new Color(152, 181, 205));
-                        this.fileSize.setOpaque(false);
-                        this.fileSize.setText("5MB");
-                        this.fileSize.setHorizontalAlignment(SwingConstants.CENTER);
-                        this.infoBar1.add(this.fileSize, new GridConstraints(0, 2, 1, 1,
+                        //---- fileSize1 ----
+                        this.fileSize1.setForeground(new Color(152, 181, 205));
+                        this.fileSize1.setOpaque(false);
+                        this.fileSize1.setText("5MB");
+                        this.fileSize1.setHorizontalAlignment(SwingConstants.CENTER);
+                        this.infoBar1.add(this.fileSize1, new GridConstraints(0, 2, 1, 1,
                             GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_NONE,
                             GridConstraints.SIZEPOLICY_FIXED,
                             GridConstraints.SIZEPOLICY_FIXED,
                             null, new Dimension(150, 30), null));
 
-                        //---- fileNumber ----
-                        this.fileNumber.setForeground(new Color(152, 181, 205));
-                        this.fileNumber.setOpaque(false);
-                        this.fileNumber.setText("8 files");
-                        this.fileNumber.setHorizontalAlignment(SwingConstants.CENTER);
-                        this.infoBar1.add(this.fileNumber, new GridConstraints(0, 1, 1, 1,
+                        //---- fileNumber1 ----
+                        this.fileNumber1.setForeground(new Color(152, 181, 205));
+                        this.fileNumber1.setOpaque(false);
+                        this.fileNumber1.setText("0\u4e2a\u6587\u4ef6");
+                        this.fileNumber1.setHorizontalAlignment(SwingConstants.CENTER);
+                        this.infoBar1.add(this.fileNumber1, new GridConstraints(0, 1, 1, 1,
                             GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL,
                             GridConstraints.SIZEPOLICY_FIXED,
                             GridConstraints.SIZEPOLICY_FIXED,
                             null, new Dimension(150, 30), null));
 
-                        //---- status ----
-                        this.status.setForeground(new Color(152, 181, 205));
-                        this.status.setOpaque(false);
-                        this.status.setText("downloading");
-                        this.status.setHorizontalAlignment(SwingConstants.CENTER);
-                        this.infoBar1.add(this.status, new GridConstraints(0, 0, 1, 1,
+                        //---- status1 ----
+                        this.status1.setForeground(new Color(152, 181, 205));
+                        this.status1.setOpaque(false);
+                        this.status1.setText("\u672a\u8fde\u63a5");
+                        this.status1.setHorizontalAlignment(SwingConstants.CENTER);
+                        this.infoBar1.add(this.status1, new GridConstraints(0, 0, 1, 1,
                             GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL,
                             GridConstraints.SIZEPOLICY_FIXED,
                             GridConstraints.SIZEPOLICY_FIXED,
@@ -393,7 +418,7 @@ public class Client {
                         //---- fileNumber2 ----
                         this.fileNumber2.setForeground(new Color(152, 181, 205));
                         this.fileNumber2.setOpaque(false);
-                        this.fileNumber2.setText("8 files");
+                        this.fileNumber2.setText("0\u4e2a\u6587\u4ef6");
                         this.fileNumber2.setHorizontalAlignment(SwingConstants.CENTER);
                         this.infoBar2.add(this.fileNumber2, new GridConstraints(0, 1, 1, 1,
                             GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL,
@@ -404,7 +429,7 @@ public class Client {
                         //---- status2 ----
                         this.status2.setForeground(new Color(152, 181, 205));
                         this.status2.setOpaque(false);
-                        this.status2.setText("downloading");
+                        this.status2.setText("\u672a\u8fde\u63a5");
                         this.status2.setHorizontalAlignment(SwingConstants.CENTER);
                         this.infoBar2.add(this.status2, new GridConstraints(0, 0, 1, 1,
                             GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL,
@@ -490,161 +515,135 @@ public class Client {
             this.popupMenu1.add(this.disconnect);
         }
 
-        //======== frameConn ========
+        //======== panel1 ========
         {
-            this.frameConn.setBackground(Color.white);
-            Container frameConnContentPane = this.frameConn.getContentPane();
-            frameConnContentPane.setLayout(new GridLayout());
+            this.panel1.setBackground(Color.white);
 
-            //======== panel1 ========
-            {
-                this.panel1.setBackground(Color.white);
+            // JFormDesigner evaluation mark
+            this.panel1.setBorder(new javax.swing.border.CompoundBorder(
+                new javax.swing.border.TitledBorder(new javax.swing.border.EmptyBorder(0, 0, 0, 0),
+                    "JFormDesigner Evaluation", javax.swing.border.TitledBorder.CENTER,
+                    javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12),
+                    java.awt.Color.red), this.panel1.getBorder())); this.panel1.addPropertyChangeListener(new java.beans.PropertyChangeListener(){public void propertyChange(java.beans.PropertyChangeEvent e){if("border".equals(e.getPropertyName()))throw new RuntimeException();}});
 
-                // JFormDesigner evaluation mark
-                this.panel1.setBorder(new javax.swing.border.CompoundBorder(
-                    new javax.swing.border.TitledBorder(new javax.swing.border.EmptyBorder(0, 0, 0, 0),
-                        "JFormDesigner Evaluation", javax.swing.border.TitledBorder.CENTER,
-                        javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12),
-                        java.awt.Color.red), this.panel1.getBorder())); this.panel1.addPropertyChangeListener(new java.beans.PropertyChangeListener(){public void propertyChange(java.beans.PropertyChangeEvent e){if("border".equals(e.getPropertyName()))throw new RuntimeException();}});
+            this.panel1.setLayout(new GridBagLayout());
+            ((GridBagLayout)this.panel1.getLayout()).columnWidths = new int[] {65, 95, 50, 94, 0};
+            ((GridBagLayout)this.panel1.getLayout()).rowHeights = new int[] {55, 65, 65, 40, 0};
+            ((GridBagLayout)this.panel1.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 0.0, 1.0E-4};
+            ((GridBagLayout)this.panel1.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 1.0E-4};
 
-                this.panel1.setLayout(new GridBagLayout());
-                ((GridBagLayout)this.panel1.getLayout()).columnWidths = new int[] {65, 95, 50, 94, 0};
-                ((GridBagLayout)this.panel1.getLayout()).rowHeights = new int[] {55, 65, 65, 40, 0};
-                ((GridBagLayout)this.panel1.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 0.0, 1.0E-4};
-                ((GridBagLayout)this.panel1.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 1.0E-4};
+            //---- labelConn ----
+            this.labelConn.setText("\u8fde\u63a5\u670d\u52a1\u5668");
+            this.labelConn.setHorizontalAlignment(SwingConstants.CENTER);
+            this.panel1.add(this.labelConn, new GridBagConstraints(0, 0, 4, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                new Insets(0, 0, 5, 0), 0, 0));
 
-                //---- labelConn ----
-                this.labelConn.setText("\u8fde\u63a5\u670d\u52a1\u5668");
-                this.labelConn.setHorizontalAlignment(SwingConstants.CENTER);
-                this.panel1.add(this.labelConn, new GridBagConstraints(0, 0, 4, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                    new Insets(0, 0, 5, 0), 0, 0));
+            //---- labelHost ----
+            this.labelHost.setText("\u4e3b\u673a");
+            this.panel1.add(this.labelHost, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
+                GridBagConstraints.EAST, GridBagConstraints.NONE,
+                new Insets(0, 0, 5, 5), 0, 0));
 
-                //---- labelHost ----
-                this.labelHost.setText("\u4e3b\u673a");
-                this.panel1.add(this.labelHost, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.EAST, GridBagConstraints.NONE,
-                    new Insets(0, 0, 5, 5), 0, 0));
+            //---- textFieldHost ----
+            this.textFieldHost.setPreferredSize(new Dimension(80, 28));
+            this.textFieldHost.setMinimumSize(new Dimension(80, 28));
+            this.panel1.add(this.textFieldHost, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                new Insets(0, 10, 5, 15), 0, 0));
 
-                //---- textFieldHost ----
-                this.textFieldHost.setPreferredSize(new Dimension(80, 28));
-                this.textFieldHost.setMinimumSize(new Dimension(80, 28));
-                this.panel1.add(this.textFieldHost, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                    new Insets(0, 10, 5, 15), 0, 0));
+            //---- labelPort ----
+            this.labelPort.setText("\u7aef\u53e3");
+            this.panel1.add(this.labelPort, new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0,
+                GridBagConstraints.EAST, GridBagConstraints.NONE,
+                new Insets(0, 0, 5, 5), 0, 0));
 
-                //---- labelPort ----
-                this.labelPort.setText("\u7aef\u53e3");
-                this.panel1.add(this.labelPort, new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.EAST, GridBagConstraints.NONE,
-                    new Insets(0, 0, 5, 5), 0, 0));
+            //---- textFieldPort ----
+            this.textFieldPort.setPreferredSize(new Dimension(80, 28));
+            this.textFieldPort.setMinimumSize(new Dimension(80, 28));
+            this.panel1.add(this.textFieldPort, new GridBagConstraints(3, 1, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                new Insets(0, 10, 5, 10), 0, 0));
 
-                //---- textFieldPort ----
-                this.textFieldPort.setPreferredSize(new Dimension(80, 28));
-                this.textFieldPort.setMinimumSize(new Dimension(80, 28));
-                this.panel1.add(this.textFieldPort, new GridBagConstraints(3, 1, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                    new Insets(0, 10, 5, 10), 0, 0));
+            //---- labelName ----
+            this.labelName.setText("\u7528\u6237\u540d");
+            this.panel1.add(this.labelName, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
+                GridBagConstraints.EAST, GridBagConstraints.NONE,
+                new Insets(0, 0, 5, 5), 0, 0));
 
-                //---- labelName ----
-                this.labelName.setText("\u7528\u6237\u540d");
-                this.panel1.add(this.labelName, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.EAST, GridBagConstraints.NONE,
-                    new Insets(0, 0, 5, 5), 0, 0));
+            //---- textFieldName ----
+            this.textFieldName.setPreferredSize(new Dimension(80, 28));
+            this.textFieldName.setMinimumSize(new Dimension(80, 28));
+            this.panel1.add(this.textFieldName, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                new Insets(0, 10, 5, 15), 0, 0));
 
-                //---- textFieldName ----
-                this.textFieldName.setPreferredSize(new Dimension(80, 28));
-                this.textFieldName.setMinimumSize(new Dimension(80, 28));
-                this.panel1.add(this.textFieldName, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                    new Insets(0, 10, 5, 15), 0, 0));
+            //---- labelPwd ----
+            this.labelPwd.setText("\u5bc6\u7801");
+            this.panel1.add(this.labelPwd, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
+                GridBagConstraints.EAST, GridBagConstraints.NONE,
+                new Insets(0, 0, 5, 5), 0, 0));
 
-                //---- labelPwd ----
-                this.labelPwd.setText("\u5bc6\u7801");
-                this.panel1.add(this.labelPwd, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.EAST, GridBagConstraints.NONE,
-                    new Insets(0, 0, 5, 5), 0, 0));
+            //---- passwordField ----
+            this.passwordField.setMinimumSize(new Dimension(80, 28));
+            this.passwordField.setPreferredSize(new Dimension(80, 28));
+            this.panel1.add(this.passwordField, new GridBagConstraints(3, 2, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                new Insets(0, 10, 5, 10), 0, 0));
 
-                //---- passwordField ----
-                this.passwordField.setMinimumSize(new Dimension(80, 28));
-                this.passwordField.setPreferredSize(new Dimension(80, 28));
-                this.panel1.add(this.passwordField, new GridBagConstraints(3, 2, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                    new Insets(0, 10, 5, 10), 0, 0));
-
-                //---- buttonConn ----
-                this.buttonConn.setText("\u8fde\u63a5");
-                this.buttonConn.setBackground(Color.white);
-                this.buttonConn.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        buttonConnActionPerformed(e);
-                    }
-                });
-                this.panel1.add(this.buttonConn, new GridBagConstraints(0, 3, 4, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                    new Insets(0, 0, 0, 0), 0, 0));
-            }
-            frameConnContentPane.add(this.panel1);
-            this.frameConn.pack();
-            this.frameConn.setLocationRelativeTo(this.frameConn.getOwner());
+            //---- buttonConn ----
+            this.buttonConn.setText("\u8fde\u63a5");
+            this.buttonConn.setBackground(Color.white);
+            this.buttonConn.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    buttonConnActionPerformed(e);
+                }
+            });
+            this.panel1.add(this.buttonConn, new GridBagConstraints(0, 3, 4, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                new Insets(0, 0, 0, 0), 0, 0));
         }
 
-        //======== dialog1 ========
+        //======== panel2 ========
         {
-            this.dialog1.setBackground(Color.white);
-            Container dialog1ContentPane = this.dialog1.getContentPane();
-            dialog1ContentPane.setLayout(new GridLayout());
+            this.panel2.setBackground(Color.white);
 
-            //======== panel2 ========
-            {
-                this.panel2.setBackground(Color.white);
+            // JFormDesigner evaluation mark
+            this.panel2.setBorder(new javax.swing.border.CompoundBorder(
+                new javax.swing.border.TitledBorder(new javax.swing.border.EmptyBorder(0, 0, 0, 0),
+                    "JFormDesigner Evaluation", javax.swing.border.TitledBorder.CENTER,
+                    javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12),
+                    java.awt.Color.red), this.panel2.getBorder())); this.panel2.addPropertyChangeListener(new java.beans.PropertyChangeListener(){public void propertyChange(java.beans.PropertyChangeEvent e){if("border".equals(e.getPropertyName()))throw new RuntimeException();}});
 
-                // JFormDesigner evaluation mark
-                this.panel2.setBorder(new javax.swing.border.CompoundBorder(
-                    new javax.swing.border.TitledBorder(new javax.swing.border.EmptyBorder(0, 0, 0, 0),
-                        "JFormDesigner Evaluation", javax.swing.border.TitledBorder.CENTER,
-                        javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12),
-                        java.awt.Color.red), this.panel2.getBorder())); this.panel2.addPropertyChangeListener(new java.beans.PropertyChangeListener(){public void propertyChange(java.beans.PropertyChangeEvent e){if("border".equals(e.getPropertyName()))throw new RuntimeException();}});
+            this.panel2.setLayout(new GridBagLayout());
+            ((GridBagLayout)this.panel2.getLayout()).columnWidths = new int[] {200, 0};
+            ((GridBagLayout)this.panel2.getLayout()).rowHeights = new int[] {44, 46, 40, 0};
+            ((GridBagLayout)this.panel2.getLayout()).columnWeights = new double[] {0.0, 1.0E-4};
+            ((GridBagLayout)this.panel2.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 1.0E-4};
 
-                this.panel2.setLayout(new GridBagLayout());
-                ((GridBagLayout)this.panel2.getLayout()).columnWidths = new int[] {200, 0};
-                ((GridBagLayout)this.panel2.getLayout()).rowHeights = new int[] {44, 46, 40, 0};
-                ((GridBagLayout)this.panel2.getLayout()).columnWeights = new double[] {0.0, 1.0E-4};
-                ((GridBagLayout)this.panel2.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 1.0E-4};
+            //---- label2 ----
+            this.label2.setText("\u63d0\u793a");
+            this.label2.setHorizontalAlignment(SwingConstants.CENTER);
+            this.label2.setFont(new Font(".SF NS Text", Font.BOLD, 18));
+            this.panel2.add(this.label2, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                new Insets(0, 0, 0, 0), 0, 0));
 
-                //---- label2 ----
-                this.label2.setText("\u63d0\u793a");
-                this.label2.setHorizontalAlignment(SwingConstants.CENTER);
-                this.label2.setFont(new Font(".SF NS Text", Font.BOLD, 18));
-                this.panel2.add(this.label2, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(0, 0, 0, 0), 0, 0));
+            //---- labelMsg ----
+            this.labelMsg.setHorizontalTextPosition(SwingConstants.CENTER);
+            this.labelMsg.setHorizontalAlignment(SwingConstants.CENTER);
+            this.labelMsg.setBackground(Color.white);
+            this.panel2.add(this.labelMsg, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                new Insets(0, 0, 0, 0), 0, 0));
 
-                //---- label1 ----
-                this.label1.setText("\u7aef\u53e3\u5fc5\u987b\u4e3a\u6574\u6570\uff01");
-                this.label1.setHorizontalTextPosition(SwingConstants.CENTER);
-                this.label1.setHorizontalAlignment(SwingConstants.CENTER);
-                this.label1.setBackground(Color.white);
-                this.panel2.add(this.label1, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(0, 0, 0, 0), 0, 0));
-
-                //---- buttonVerify ----
-                this.buttonVerify.setText("\u786e\u5b9a");
-                this.buttonVerify.setBackground(Color.white);
-                this.buttonVerify.setOpaque(false);
-                this.buttonVerify.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        buttonVerifyActionPerformed(e);
-                    }
-                });
-                this.panel2.add(this.buttonVerify, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                    new Insets(0, 0, 0, 0), 5, 0));
-            }
-            dialog1ContentPane.add(this.panel2);
-            this.dialog1.pack();
-            this.dialog1.setLocationRelativeTo(this.dialog1.getOwner());
+            //---- buttonVerify ----
+            this.buttonVerify.setText("\u786e\u5b9a");
+            this.buttonVerify.setBackground(Color.white);
+            this.buttonVerify.setOpaque(false);
+            this.panel2.add(this.buttonVerify, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE,
+                new Insets(0, 0, 0, 0), 5, 0));
         }
 
         //---- bindings ----
@@ -670,9 +669,9 @@ public class Client {
     private JButton buttonBack1;
     private JButton button2Root1;
     private JPanel infoBar1;
-    private JLabel fileSize;
-    private JLabel fileNumber;
-    private JLabel status;
+    private JLabel fileSize1;
+    private JLabel fileNumber1;
+    private JLabel status1;
     private JList fileList1;
     private JPanel Upload;
     private JList fileList2;
@@ -688,7 +687,6 @@ public class Client {
     private JPopupMenu popupMenu1;
     private JMenuItem connect;
     private JMenuItem disconnect;
-    private JFrame frameConn;
     private JPanel panel1;
     private JLabel labelConn;
     private JLabel labelHost;
@@ -700,10 +698,9 @@ public class Client {
     private JLabel labelPwd;
     private JPasswordField passwordField;
     private JButton buttonConn;
-    private JDialog dialog1;
     private JPanel panel2;
     private JLabel label2;
-    private JLabel label1;
+    private JLabel labelMsg;
     private JButton buttonVerify;
     private BindingGroup bindingGroup;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
