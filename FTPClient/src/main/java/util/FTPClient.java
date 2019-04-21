@@ -2,10 +2,7 @@ package util;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * Created by Pan on 2019/4/17.
@@ -16,10 +13,14 @@ public class FTPClient {
     private PrintWriter writer;
 
     private Socket dataSocket;
-    private BufferedInputStream inputStream;
-    private BufferedOutputStream outputStream;
     private String dataHost;
     private int dataPort;
+
+    private HashMap<String,Double> progress;
+
+    public FTPClient(){
+        progress = new HashMap<>();
+    }
 
     /**
      *  连接ftp服务器
@@ -31,7 +32,7 @@ public class FTPClient {
      */
     public void connect(String host,int port,String username,String password) throws Exception{
         if(socket!= null)
-            throw new Exception("socket has already connected!");
+            throw new Exception("连接已经建立！");
 
         socket = new Socket(host,port);
         reader =new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -47,18 +48,19 @@ public class FTPClient {
         System.out.println(response);
 
         if(!response.startsWith("331 ")){
-            System.out.println("error");
+            throw new Exception("用户名不正确！");
         }
         writer.println("PASS "+password);
         writer.flush();
         response = reader.readLine();
         System.out.println(response);
         if(!response.startsWith("230 ")){
-            System.out.println("error");
-            return;
+            throw new Exception("密码错误！");
         }
 
         System.out.println("connect succeed. ");
+
+
 
     }
 
@@ -112,9 +114,12 @@ public class FTPClient {
      */
     public void close(){
         try{
-            socket.close();
-            reader.close();
-            writer.close();
+            if(socket != null)
+                socket.close();
+            if(reader!= null)
+                reader.close();
+            if(writer != null)
+                writer.close();
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -150,22 +155,60 @@ public class FTPClient {
      * @param serverpath 服务器上的地址
      * @throws Exception 读写错误
      */
-    public void download(String localpath,String serverpath) throws Exception{
+    public void download(String localpath,String serverpath,Object lock) throws Exception{
+
         calDataHostPort();
-        writer.println("RETR " + serverpath);
+
+        int length = 0;
+        writer.println("SIZE "+serverpath);
         writer.flush();
         String response = reader.readLine();
         System.out.println(response);
+        length = Integer.parseInt(response.substring(4,response.length()));
+        System.out.println("文件总长："+length);
+
+        File file = new File(localpath);
+        int startIndex = 0;
+        if(file.exists())
+            startIndex = (int) file.length();
+
+        RandomAccessFile randomAccessFile = new RandomAccessFile(file,"rw");
+        randomAccessFile.seek(startIndex);
+
+        writer.println("REST "+startIndex);
+        writer.flush();
+
+
+        response = reader.readLine();
+        System.out.println(response);
+
+        writer.println("RETR " + serverpath);
+        writer.flush();
+
+        response = reader.readLine();
+        System.out.println(response);
+
+
+
+
         dataSocket = new Socket(dataHost, dataPort);
-        inputStream = new BufferedInputStream(dataSocket.getInputStream());
-        outputStream = new BufferedOutputStream(new FileOutputStream(new File(localpath)));
+        BufferedInputStream inputStream = new BufferedInputStream(dataSocket.getInputStream());
+
+
+
         byte[] buffer = new byte[4096];
         int bytesRead = 0;
+
+
+        int already = startIndex;
         while ((bytesRead = inputStream.read(buffer))!=-1){
-            outputStream.write(buffer,0,bytesRead);
+            randomAccessFile.write(buffer,0,bytesRead);
+            already += bytesRead;
+            synchronized (lock) {
+                progress.put(localpath, (double) already / length);
+            }
         }
-        outputStream.flush();
-        outputStream.close();
+        randomAccessFile.close();
         inputStream.close();
         dataSocket.close();
     }
@@ -176,28 +219,53 @@ public class FTPClient {
      * @param serverpath 服务器上的地址
      * @throws Exception 读写错误
      */
-    public void upload(String localpath,String serverpath) throws Exception{
+    public synchronized void upload(String localpath,String serverpath) throws Exception{
         calDataHostPort();
 
-        writer.println("STOR "+serverpath);
+        writer.println("SIZE "+serverpath);
         writer.flush();
+        int size= 0;
 
-        dataSocket = new Socket(dataHost,dataPort);
         String response = reader.readLine();
         System.out.println(response);
+        if(!response.startsWith("550")){
+            size = Integer.parseInt(response.substring(4,response.length()));
+        }
 
-        outputStream = new BufferedOutputStream(dataSocket.getOutputStream());
-        inputStream = new BufferedInputStream(new FileInputStream(new File(localpath)));
+
+
+        writer.println("APPE "+serverpath);
+        writer.flush();
+        response = reader.readLine();
+        System.out.println(response);
+
+        dataSocket = new Socket(dataHost,dataPort);
+
+        File file = new File(localpath);
+        RandomAccessFile randomAccessFile = new RandomAccessFile(file,"r");
+        randomAccessFile.seek(size);
+
+        BufferedOutputStream outputStream = new BufferedOutputStream(dataSocket.getOutputStream());
+//        inputStream = new BufferedInputStream(new FileInputStream());
 
         byte[] buffer = new byte[4096];
         int bytesRead = 0;
-        while ((bytesRead = inputStream.read(buffer))!=-1){
+        while ((bytesRead = randomAccessFile.read(buffer))!=-1){
             outputStream.write(buffer,0,bytesRead);
         }
         outputStream.flush();
         outputStream.close();
-        inputStream.close();
+//        inputStream.close();
         dataSocket.close();
     }
 
+    public double getProgress(String filepath,Object lock){
+        double i = 0;
+        synchronized (lock) {
+            if (progress.containsKey(filepath))
+                i = progress.get(filepath);
+        }
+        return i;
+
+    }
 }
