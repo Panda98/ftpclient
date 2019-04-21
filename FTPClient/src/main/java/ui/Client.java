@@ -12,7 +12,6 @@ import org.jdesktop.beansbinding.*;
 import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
 
 import util.FTPClient;
-import model.Connection;
 
 
 /**
@@ -22,31 +21,6 @@ import model.Connection;
 public class Client {
 
     private FTPClient client = new FTPClient();
-
-    // connection
-    private Connection connection;
-
-    private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
-
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        changeSupport.addPropertyChangeListener(listener);
-    }
-
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        changeSupport.removePropertyChangeListener(listener);
-    }
-
-    public Connection getConnection() {
-        return connection;
-    }
-
-    public void setConnection(Connection conn) {
-        Connection oldConn = this.connection;
-        this.connection = conn;
-        changeSupport.firePropertyChange("connection", oldConn, conn);
-    }
-
-    // connection - end
 
     public Client() {
         initComponents();
