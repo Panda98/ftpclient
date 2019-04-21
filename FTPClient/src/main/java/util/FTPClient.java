@@ -130,8 +130,8 @@ public class FTPClient {
 
     }
     private void calDataHostPort(){
-        writer.println("PASV");
-        writer.flush();
+        sendMsg("PASV");
+
         try{
             String response = reader.readLine();
             System.out.println(response);
@@ -151,6 +151,10 @@ public class FTPClient {
         }
     }
 
+    private void sendMsg(String msg){
+        writer.write(msg+"\r\n");
+        writer.flush();
+    }
 
     /**
      * 下载文件
@@ -163,8 +167,7 @@ public class FTPClient {
         calDataHostPort();
 
         long length = 0;
-        writer.println("SIZE "+serverpath);
-        writer.flush();
+        sendMsg("SIZE "+serverpath);
         String response = reader.readLine();
         System.out.println(response);
         length = Integer.parseInt(response.substring(4,response.length()));
@@ -178,15 +181,12 @@ public class FTPClient {
         RandomAccessFile randomAccessFile = new RandomAccessFile(file,"rw");
         randomAccessFile.seek(startIndex);
 
-        writer.println("REST "+startIndex);
-        writer.flush();
-
+        sendMsg("REST "+startIndex);
 
         response = reader.readLine();
         System.out.println(response);
 
-        writer.println("RETR " + serverpath);
-        writer.flush();
+        sendMsg("RETR "+serverpath);
 
         response = reader.readLine();
         System.out.println(response);
@@ -228,8 +228,8 @@ public class FTPClient {
 
         calDataHostPort();
 
-        writer.println("SIZE "+serverpath);
-        writer.flush();
+        sendMsg("SIZE "+serverpath);
+
         int size= 0;
 
         String response = reader.readLine();
@@ -238,10 +238,7 @@ public class FTPClient {
             size = Integer.parseInt(response.substring(4,response.length()));
         }
 
-
-
-        writer.println("APPE "+serverpath);
-        writer.flush();
+        sendMsg("APPE "+serverpath);
         response = reader.readLine();
         System.out.println(response);
 
@@ -264,7 +261,6 @@ public class FTPClient {
                 progress = (double) already / length;
             }
             outputStream.flush();
-            return;
 
         }
         randomAccessFile.close();
