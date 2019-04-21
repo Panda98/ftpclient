@@ -2,8 +2,10 @@ package ui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.plaf.*;
@@ -21,6 +23,11 @@ import util.FTPClient;
 public class Client {
 
     private FTPClient client = new FTPClient();
+    static private ExecutorService threadPool;
+
+    static {
+        threadPool = Executors.newCachedThreadPool();
+    }
 
     public Client() {
         initComponents();
@@ -48,7 +55,7 @@ public class Client {
 
     private void connectActionPerformed(ActionEvent e) {
         JFrame frame = new JFrame("Connect");
-        frame.setSize(318, 286);
+        frame.setSize(335, 236);
         frame.setResizable(false);
         frame.setContentPane(new Client().panel1);
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -105,9 +112,9 @@ public class Client {
         String msg = null;
 
         try {
-            String host = this.textFieldHost.getText();
-            String portStr = this.textFieldPort.getText();
-            String username = this.textFieldName.getText();
+            String host = this.textFieldHost.getText().trim();
+            String portStr = this.textFieldPort.getText().trim();
+            String username = this.textFieldName.getText().trim();
             String pwd = new String(this.passwordField.getPassword());
 
             if (isEmpty(host) || isEmpty(portStr) || isEmpty(username) || isEmpty(pwd)) {
@@ -115,11 +122,12 @@ public class Client {
                 return;
             }
 
-            int port = Integer.parseInt(portStr);
+            final int port = Integer.parseInt(portStr);
 
             runner = new ConnectRun(host, port, username, pwd);
-            Thread thread = new Thread(runner);
-            thread.run();
+            threadPool.execute(runner);
+
+
             isRun = true;
 
         } catch (NumberFormatException e1) {
@@ -127,7 +135,12 @@ public class Client {
 
         } finally {
             if (isRun) {
-                msg = runner.msg;
+                try {
+                    threadPool.awaitTermination(2, TimeUnit.SECONDS);
+                    msg = runner.msg;
+                } catch (InterruptedException e2){
+                    e2.printStackTrace();
+                }
             }
 
             JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
@@ -136,6 +149,7 @@ public class Client {
                 window.dispose();
                 this.status1.setText("已连接");
                 this.status2.setText("已连接");
+
             }
         }
 
@@ -501,7 +515,7 @@ public class Client {
                     java.awt.Color.red), this.panel1.getBorder())); this.panel1.addPropertyChangeListener(new java.beans.PropertyChangeListener(){public void propertyChange(java.beans.PropertyChangeEvent e){if("border".equals(e.getPropertyName()))throw new RuntimeException();}});
 
             this.panel1.setLayout(new GridBagLayout());
-            ((GridBagLayout)this.panel1.getLayout()).columnWidths = new int[] {65, 95, 50, 94, 0};
+            ((GridBagLayout)this.panel1.getLayout()).columnWidths = new int[] {58, 95, 48, 94, 0};
             ((GridBagLayout)this.panel1.getLayout()).rowHeights = new int[] {55, 65, 65, 40, 0};
             ((GridBagLayout)this.panel1.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 0.0, 1.0E-4};
             ((GridBagLayout)this.panel1.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 0.0, 1.0E-4};
@@ -520,8 +534,9 @@ public class Client {
                 new Insets(0, 0, 5, 5), 0, 0));
 
             //---- textFieldHost ----
-            this.textFieldHost.setPreferredSize(new Dimension(80, 28));
-            this.textFieldHost.setMinimumSize(new Dimension(80, 28));
+            this.textFieldHost.setPreferredSize(new Dimension(90, 28));
+            this.textFieldHost.setMinimumSize(new Dimension(90, 28));
+            this.textFieldHost.setText("192.168.2.7");
             this.panel1.add(this.textFieldHost, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 new Insets(0, 10, 5, 15), 0, 0));
@@ -533,8 +548,9 @@ public class Client {
                 new Insets(0, 0, 5, 5), 0, 0));
 
             //---- textFieldPort ----
-            this.textFieldPort.setPreferredSize(new Dimension(80, 28));
-            this.textFieldPort.setMinimumSize(new Dimension(80, 28));
+            this.textFieldPort.setPreferredSize(new Dimension(90, 28));
+            this.textFieldPort.setMinimumSize(new Dimension(90, 28));
+            this.textFieldPort.setText("21");
             this.panel1.add(this.textFieldPort, new GridBagConstraints(3, 1, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 new Insets(0, 10, 5, 10), 0, 0));
@@ -546,8 +562,9 @@ public class Client {
                 new Insets(0, 0, 5, 5), 0, 0));
 
             //---- textFieldName ----
-            this.textFieldName.setPreferredSize(new Dimension(80, 28));
-            this.textFieldName.setMinimumSize(new Dimension(80, 28));
+            this.textFieldName.setPreferredSize(new Dimension(90, 28));
+            this.textFieldName.setMinimumSize(new Dimension(90, 28));
+            this.textFieldName.setText("810650217@qq.com");
             this.panel1.add(this.textFieldName, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 new Insets(0, 10, 5, 15), 0, 0));
@@ -559,8 +576,9 @@ public class Client {
                 new Insets(0, 0, 5, 5), 0, 0));
 
             //---- passwordField ----
-            this.passwordField.setMinimumSize(new Dimension(80, 28));
-            this.passwordField.setPreferredSize(new Dimension(80, 28));
+            this.passwordField.setMinimumSize(new Dimension(90, 28));
+            this.passwordField.setPreferredSize(new Dimension(90, 28));
+            this.passwordField.setText("pyy19980118");
             this.panel1.add(this.passwordField, new GridBagConstraints(3, 2, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 new Insets(0, 10, 5, 10), 0, 0));

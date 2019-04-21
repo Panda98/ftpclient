@@ -331,7 +331,7 @@ new FormModel {
 			"location": new java.awt.Point( 525, 40 )
 		} )
 		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridBagLayout ) {
-			"$columnSpecs": "60, 90, 45, 94"
+			"$columnSpecs": "53, 90, 43, 94"
 			"$rowSpecs": "50, 60, 60, 40"
 			"$hGap": 5
 			"$vGap": 5
@@ -359,14 +359,15 @@ new FormModel {
 			} )
 			add( new FormComponent( "javax.swing.JTextField" ) {
 				name: "textFieldHost"
-				"preferredSize": new java.awt.Dimension( 80, 28 )
-				"minimumSize": &Dimension16 new java.awt.Dimension( 80, 28 )
+				"preferredSize": new java.awt.Dimension( 90, 28 )
+				"minimumSize": new java.awt.Dimension( 90, 28 )
+				"text": "192.168.2.7"
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
-				"gridx": 1
 				"gridy": 1
 				"hAlign": 0
 				"vAlign": 0
 				"insets": new java.awt.Insets( 0, 10, 0, 10 )
+				"gridx": 1
 			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "labelPort"
@@ -379,8 +380,9 @@ new FormModel {
 			} )
 			add( new FormComponent( "javax.swing.JTextField" ) {
 				name: "textFieldPort"
-				"preferredSize": new java.awt.Dimension( 80, 28 )
-				"minimumSize": #Dimension16
+				"preferredSize": new java.awt.Dimension( 90, 28 )
+				"minimumSize": new java.awt.Dimension( 90, 28 )
+				"text": "21"
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
 				"gridy": 1
 				"hAlign": 0
@@ -398,14 +400,15 @@ new FormModel {
 			} )
 			add( new FormComponent( "javax.swing.JTextField" ) {
 				name: "textFieldName"
-				"preferredSize": new java.awt.Dimension( 80, 28 )
-				"minimumSize": #Dimension16
+				"preferredSize": new java.awt.Dimension( 90, 28 )
+				"minimumSize": new java.awt.Dimension( 90, 28 )
+				"text": "810650217@qq.com"
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
 				"gridy": 2
 				"hAlign": 0
 				"vAlign": 0
-				"gridx": 1
 				"insets": new java.awt.Insets( 0, 10, 0, 10 )
+				"gridx": 1
 			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "labelPwd"
@@ -418,8 +421,9 @@ new FormModel {
 			} )
 			add( new FormComponent( "javax.swing.JPasswordField" ) {
 				name: "passwordField"
-				"minimumSize": new java.awt.Dimension( 80, 28 )
-				"preferredSize": new java.awt.Dimension( 80, 28 )
+				"minimumSize": new java.awt.Dimension( 90, 28 )
+				"preferredSize": new java.awt.Dimension( 90, 28 )
+				"text": "pyy19980118"
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
 				"gridx": 3
 				"gridy": 2
@@ -440,7 +444,7 @@ new FormModel {
 			} )
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 0, 546 )
-			"size": new java.awt.Dimension( 318, 236 )
+			"size": new java.awt.Dimension( 335, 236 )
 		} )
 		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridBagLayout ) {
 			"$columnSpecs": "200"
