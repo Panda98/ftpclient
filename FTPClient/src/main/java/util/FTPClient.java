@@ -16,11 +16,8 @@ public class FTPClient {
     private String dataHost;
     private int dataPort;
 
-    private HashMap<String,Double> progress;
+    private double progress;
 
-    public FTPClient(){
-        progress = new HashMap<>();
-    }
 
     /**
      *  连接ftp服务器
@@ -205,7 +202,7 @@ public class FTPClient {
             randomAccessFile.write(buffer,0,bytesRead);
             already += bytesRead;
             synchronized (lock) {
-                progress.put(localpath, (double) already / length);
+                progress = (double) already / length;
             }
         }
         randomAccessFile.close();
@@ -259,11 +256,16 @@ public class FTPClient {
         dataSocket.close();
     }
 
+    /**
+     * 获得当前文件下载进度
+     * @param filepath
+     * @param lock
+     * @return
+     */
     public double getProgress(String filepath,Object lock){
         double i = 0;
         synchronized (lock) {
-            if (progress.containsKey(filepath))
-                i = progress.get(filepath);
+            i = this.progress;
         }
         return i;
 
