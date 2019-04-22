@@ -40,8 +40,6 @@ public class FTPClient {
         String msg = reader.readLine();
         System.out.println(msg);
 
-
-
         sendMsg("USER "+username);
         String response = reader.readLine();
         System.out.println(response);
@@ -270,14 +268,13 @@ public class FTPClient {
 
     /**
      * 获得当前文件下载进度
-     * @param filepath
      * @param lock
      * @return
      */
 
 
 
-    public double getProgress(String filepath,Object lock){
+    public double getProgress(Object lock){
         double i = 0;
         synchronized (lock) {
             i = this.progress;

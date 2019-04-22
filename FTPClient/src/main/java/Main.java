@@ -66,8 +66,14 @@ public class Main {
         }catch (Exception e){
             e.printStackTrace();
         }
+        String path = "";
+        try {
+            path = new String("test\\2.txt".getBytes(),"ISO-8859-1");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
-        Thread thread1 = new Thread(new Child2("C:\\Users\\Pan\\Desktop\\1.txt","test\\1\\新建文件夹\\1.txt",client,c));
+        Thread thread1 = new Thread(new Child2("C:\\Users\\Pan\\Desktop\\1.txt",path,client,c));
         thread1.start();
 
 //        Thread thread2 = new Thread(new Child2("C:\\Users\\Pan\\Desktop\\2.txt","test\\2.txt",client2,c2));
@@ -75,7 +81,7 @@ public class Main {
 
 
         while (thread1.isAlive()){
-            double i = client.getProgress("C:\\Users\\Pan\\Desktop\\hello.txt",c);
+            double i = client.getProgress(c);
 //            double j = client2.getProgress("C:\\Users\\Pan\\Desktop\\2.txt",c2);
             System.out.println("1.txt: "+i);
 //            System.out.println("2.txt: "+j);
