@@ -1,5 +1,7 @@
 import util.FTPClient;
 
+import java.util.HashMap;
+
 /**
  * Created by Pan on 2019/4/17.
  */
@@ -47,7 +49,7 @@ public class Main {
             try{
 //            client.upload("C:\\Users\\Pan\\Desktop\\hello.txt","test\\hello.txt");
 //            client.list("/");
-                client.upload(localpath,serverpath,c);
+                client.download(localpath,serverpath,c);
             }catch (Exception e){
                 e.printStackTrace();
             }finally {
@@ -60,21 +62,23 @@ public class Main {
         thread.start();
         try{
             thread.join();
+            HashMap hashMap = client.list("/");
         }catch (Exception e){
             e.printStackTrace();
         }
-        Thread thread1 = new Thread(new Child2("C:\\Users\\Pan\\Desktop\\hello.txt","test\\hello.txt",client,c));
+
+        Thread thread1 = new Thread(new Child2("C:\\Users\\Pan\\Desktop\\1.txt","test\\1\\新建文件夹\\1.txt",client,c));
         thread1.start();
 
-        Thread thread2 = new Thread(new Child2("C:\\Users\\Pan\\Desktop\\2.txt","test\\2.txt",client2,c2));
-        thread2.start();
+//        Thread thread2 = new Thread(new Child2("C:\\Users\\Pan\\Desktop\\2.txt","test\\2.txt",client2,c2));
+//        thread2.start();
 
 
-        while (thread1.isAlive() || thread2.isAlive()){
+        while (thread1.isAlive()){
             double i = client.getProgress("C:\\Users\\Pan\\Desktop\\hello.txt",c);
-            double j = client2.getProgress("C:\\Users\\Pan\\Desktop\\2.txt",c2);
-            System.out.println("hello.txt: "+i);
-            System.out.println("2.txt: "+j);
+//            double j = client2.getProgress("C:\\Users\\Pan\\Desktop\\2.txt",c2);
+            System.out.println("1.txt: "+i);
+//            System.out.println("2.txt: "+j);
             try{
                 Thread.sleep(1000);
             }catch (Exception e){
