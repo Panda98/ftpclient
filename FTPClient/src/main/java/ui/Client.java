@@ -2,19 +2,23 @@ package ui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.concurrent.Executor;
+import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.plaf.*;
+
 import com.intellij.uiDesigner.core.*;
 import org.jdesktop.beansbinding.*;
 import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
+import org.jdesktop.swingbinding.*;
+
 
 import util.FTPClient;
-
+import model.File;
 
 /**
  * @author yiner
@@ -24,6 +28,21 @@ public class Client {
 
     private FTPClient client = new FTPClient();
     static private ExecutorService threadPool;
+    private String status;
+
+
+    //private List<String> fileNames;
+    //private List<String> fileTypes;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        String oldValue = this.status;
+        this.status = status;
+        //firePropertyChange("text", oldValue, status);
+    }
 
     static {
         threadPool = Executors.newCachedThreadPool();
@@ -105,52 +124,160 @@ public class Client {
         }
     }
 
+    private String performConnect(String host, int port, String username, String pwd) {
+        String msg;
+        try {
+            client.connect(host, port, username, pwd);
+            msg = "连接成功！";
+        } catch (Exception e) {
+            msg = e.getMessage();
+        }
+        return msg;
+    }
+
     private void buttonConnActionPerformed(ActionEvent e) {
 
-        boolean isRun = false;
-        ConnectRun runner = null;
+        threadPool.execute(new Runnable() {
+            public void run() {
+                boolean isRun = false;
+                ConnectRun runner = null;
+                String msg = null;
+
+                try {
+                    String host = textFieldHost.getText().trim();
+                    String portStr = textFieldPort.getText().trim();
+                    String username = textFieldName.getText().trim();
+                    String pwd = new String(passwordField.getPassword());
+
+                    if (isEmpty(host) || isEmpty(portStr) || isEmpty(username) || isEmpty(pwd)) {
+                        msg = "输入框不能为空！";
+                        return;
+                    }
+
+                    final int port = Integer.parseInt(portStr);
+
+                    msg = performConnect(host, port, username, pwd);
+
+                    isRun = true;
+
+                } catch (NumberFormatException e1) {
+                    msg = "端口必须为整数！";
+
+                } finally {
+
+                    if (msg.equals("")) {
+                        msg = "连接失败！";
+                        status = "未连接";
+                    }
+
+                    JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
+                    if (msg.equals("连接成功！") || msg.equals("连接已经建立！") ) {
+                        Window window = SwingUtilities.getWindowAncestor(buttonConn);
+                        window.dispose();
+                        status = "已连接";
+
+                        refreshMainFrame();
+
+                    }
+                }
+            }
+        });
+
+
+
+//        boolean isRun = false;
+//        ConnectRun runner = null;
+//        String msg = null;
+//
+//        try {
+//            String host = this.textFieldHost.getText().trim();
+//            String portStr = this.textFieldPort.getText().trim();
+//            String username = this.textFieldName.getText().trim();
+//            String pwd = new String(this.passwordField.getPassword());
+//
+//            if (isEmpty(host) || isEmpty(portStr) || isEmpty(username) || isEmpty(pwd)) {
+//                msg = "输入框不能为空！";
+//                return;
+//            }
+//
+//            final int port = Integer.parseInt(portStr);
+//
+//            runner = new ConnectRun(host, port, username, pwd);
+//            threadPool.execute(runner);
+//
+//
+//            isRun = true;
+//
+//        } catch (NumberFormatException e1) {
+//            msg = "端口必须为整数！";
+//
+//        } finally {
+//            if (isRun) {
+//                try {
+//                    threadPool.awaitTermination(2, TimeUnit.SECONDS);
+//                    msg = runner.msg;
+//                } catch (InterruptedException e2){
+//                    e2.printStackTrace();
+//                }
+//            }
+//
+//            if (msg.equals("")) {
+//                msg = "连接失败！";
+//                status = "未连接";
+//            }
+//
+//
+//            JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
+//            if (msg.equals("连接成功！") || msg.equals("连接已经建立！") ) {
+//                Window window = SwingUtilities.getWindowAncestor(this.buttonConn);
+//                window.dispose();
+//                status = "已连接";
+//                threadPool.execute(new Runnable() {
+//                    public void run() {
+//                        Window frame = SwingUtilities.windowForComponent(tabbedPane1);
+//                        status1.setText(status);
+////                        SwingUtilities.invokeLater(new Runnable() {
+////                            public void run() {
+////                                status1.setText(status);
+////                            }
+////                        });
+//                    }
+//                });
+//            }
+//        }
+
+    }
+
+    private void refreshMainFrame() {
+        threadPool.execute(new Runnable() {
+            public void run() {
+
+                listFile("/");
+
+                status2.setText(status);
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        status1.setText(status);
+                    }
+                });
+            }
+        });
+    }
+
+    private void listFile (String path) {
         String msg = null;
 
         try {
-            String host = this.textFieldHost.getText().trim();
-            String portStr = this.textFieldPort.getText().trim();
-            String username = this.textFieldName.getText().trim();
-            String pwd = new String(this.passwordField.getPassword());
-
-            if (isEmpty(host) || isEmpty(portStr) || isEmpty(username) || isEmpty(pwd)) {
-                msg = "输入框不能为空！";
-                return;
+            LinkedHashMap<String,String> fileList =  client.list(path);
+            Iterator<Map.Entry<String, String>> iterator = fileList.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, String> entry = iterator.next();
+                files.add(new File(entry.getKey(), entry.getValue()));
             }
 
-            final int port = Integer.parseInt(portStr);
-
-            runner = new ConnectRun(host, port, username, pwd);
-            threadPool.execute(runner);
-
-
-            isRun = true;
-
-        } catch (NumberFormatException e1) {
-            msg = "端口必须为整数！";
-
-        } finally {
-            if (isRun) {
-                try {
-                    threadPool.awaitTermination(2, TimeUnit.SECONDS);
-                    msg = runner.msg;
-                } catch (InterruptedException e2){
-                    e2.printStackTrace();
-                }
-            }
-
+        } catch (Exception e) {
+            msg = e.getMessage();
             JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
-            if (msg.equals("连接成功！")) {
-                Window window = SwingUtilities.getWindowAncestor(this.buttonConn);
-                window.dispose();
-                this.status1.setText("已连接");
-                this.status2.setText("已连接");
-
-            }
         }
 
     }
@@ -165,11 +292,12 @@ public class Client {
         this.filePath1 = new JPanel();
         this.buttonBack1 = new JButton();
         this.button2Root1 = new JButton();
+        this.scrollPane1 = new JScrollPane();
+        this.table1 = new JTable();
         this.infoBar1 = new JPanel();
         this.fileSize1 = new JLabel();
         this.fileNumber1 = new JLabel();
         this.status1 = new JLabel();
-        this.fileList1 = new JList();
         this.Upload = new JPanel();
         this.fileList2 = new JList();
         this.fileChooser = new JPanel();
@@ -195,10 +323,6 @@ public class Client {
         this.labelPwd = new JLabel();
         this.passwordField = new JPasswordField();
         this.buttonConn = new JButton();
-        this.panel2 = new JPanel();
-        this.label2 = new JLabel();
-        this.labelMsg = new JLabel();
-        this.buttonVerify = new JButton();
 
         //======== mainPanel ========
         {
@@ -287,6 +411,19 @@ public class Client {
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                         new Insets(5, 5, 10, 5), 0, 0));
 
+                    //======== scrollPane1 ========
+                    {
+
+                        //---- table1 ----
+                        this.table1.setColumnSelectionAllowed(true);
+                        this.table1.setRowHeight(40);
+                        this.table1.setRowMargin(5);
+                        this.scrollPane1.setViewportView(this.table1);
+                    }
+                    this.Download.add(this.scrollPane1, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(0, 0, 5, 0), 0, 0));
+
                     //======== infoBar1 ========
                     {
                         this.infoBar1.setBackground(new Color(234, 245, 255));
@@ -330,13 +467,6 @@ public class Client {
                     this.Download.add(this.infoBar1, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                         new Insets(0, 0, 0, 0), 0, 0));
-
-                    //---- fileList1 ----
-                    this.fileList1.setMaximumSize(new Dimension(40, 60));
-                    this.fileList1.setMinimumSize(new Dimension(40, 60));
-                    this.Download.add(this.fileList1, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                        new Insets(0, 0, 5, 0), 0, 0));
                 }
                 this.tabbedPane1.addTab("\u4e0b\u8f7d", new ImageIcon(getClass().getResource("/ui/icon/download_selected.png")), this.Download);
                 this.tabbedPane1.setDisabledIconAt(0, new ImageIcon(getClass().getResource("/ui/icon/download_unselected.png")));
@@ -596,59 +726,25 @@ public class Client {
                 new Insets(0, 0, 0, 0), 0, 0));
         }
 
-        //======== panel2 ========
-        {
-            this.panel2.setBackground(Color.white);
-
-            // JFormDesigner evaluation mark
-            this.panel2.setBorder(new javax.swing.border.CompoundBorder(
-                new javax.swing.border.TitledBorder(new javax.swing.border.EmptyBorder(0, 0, 0, 0),
-                    "JFormDesigner Evaluation", javax.swing.border.TitledBorder.CENTER,
-                    javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12),
-                    java.awt.Color.red), this.panel2.getBorder())); this.panel2.addPropertyChangeListener(new java.beans.PropertyChangeListener(){public void propertyChange(java.beans.PropertyChangeEvent e){if("border".equals(e.getPropertyName()))throw new RuntimeException();}});
-
-            this.panel2.setLayout(new GridBagLayout());
-            ((GridBagLayout)this.panel2.getLayout()).columnWidths = new int[] {200, 0};
-            ((GridBagLayout)this.panel2.getLayout()).rowHeights = new int[] {44, 46, 40, 0};
-            ((GridBagLayout)this.panel2.getLayout()).columnWeights = new double[] {0.0, 1.0E-4};
-            ((GridBagLayout)this.panel2.getLayout()).rowWeights = new double[] {0.0, 0.0, 0.0, 1.0E-4};
-
-            //---- label2 ----
-            this.label2.setText("\u63d0\u793a");
-            this.label2.setHorizontalAlignment(SwingConstants.CENTER);
-            this.label2.setFont(new Font(".SF NS Text", Font.BOLD, 18));
-            this.panel2.add(this.label2, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                new Insets(0, 0, 0, 0), 0, 0));
-
-            //---- labelMsg ----
-            this.labelMsg.setHorizontalTextPosition(SwingConstants.CENTER);
-            this.labelMsg.setHorizontalAlignment(SwingConstants.CENTER);
-            this.labelMsg.setBackground(Color.white);
-            this.panel2.add(this.labelMsg, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                new Insets(0, 0, 0, 0), 0, 0));
-
-            //---- buttonVerify ----
-            this.buttonVerify.setText("\u786e\u5b9a");
-            this.buttonVerify.setBackground(Color.white);
-            this.buttonVerify.setOpaque(false);
-            this.panel2.add(this.buttonVerify, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE,
-                new Insets(0, 0, 0, 0), 5, 0));
-        }
-
         //---- bindings ----
         this.bindingGroup = new BindingGroup();
-        this.bindingGroup.addBinding(Bindings.createAutoBinding(UpdateStrategy.READ_WRITE,
-            this.panel1, ELProperty.create("${connection.address}"),
-            this.textFieldHost, BeanProperty.create("text_ON_ACTION_OR_FOCUS_LOST")));
+        {
+            JTableBinding binding = SwingBindings.createJTableBinding(UpdateStrategy.READ,
+                this.files, this.table1);
+            binding.addColumnBinding(BeanProperty.create("name"))
+                .setColumnName("Name")
+                .setColumnClass(String.class);
+            binding.addColumnBinding(BeanProperty.create("type"))
+                .setColumnName("Type")
+                .setColumnClass(String.class);
+            binding.setSourceNullValue(Collections.EMPTY_LIST);
+            this.bindingGroup.addBinding(binding);
+        }
         this.bindingGroup.bind();
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
 
         // Add by yiner
         tabbedPane1.setUI(new FlatTabbedPanedUI());
-
         // Add by yiner - End
     }
 
@@ -660,11 +756,12 @@ public class Client {
     private JPanel filePath1;
     private JButton buttonBack1;
     private JButton button2Root1;
+    private JScrollPane scrollPane1;
+    private JTable table1;
     private JPanel infoBar1;
     private JLabel fileSize1;
     private JLabel fileNumber1;
     private JLabel status1;
-    private JList fileList1;
     private JPanel Upload;
     private JList fileList2;
     private JPanel fileChooser;
@@ -690,10 +787,7 @@ public class Client {
     private JLabel labelPwd;
     private JPasswordField passwordField;
     private JButton buttonConn;
-    private JPanel panel2;
-    private JLabel label2;
-    private JLabel labelMsg;
-    private JButton buttonVerify;
+    private List<model.File> files;
     private BindingGroup bindingGroup;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
