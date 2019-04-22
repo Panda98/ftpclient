@@ -102,11 +102,10 @@ public class FTPClient {
         String line;
         while ((line = dataReader.readLine())!= null){
             int index = line.lastIndexOf(' ');
-            String s = new String(line.substring(index+1,line.length()).getBytes());
-            String type = "FILE";
-            if(line.contains("DIR"))
-                type = "DIR";
-            contents.put(s,type);
+            String type = "DIR";
+            if(line.contains("."))
+                type = "FILE";
+            contents.put(line,type);
             System.out.println(line);
         }
 
