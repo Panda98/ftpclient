@@ -73,6 +73,9 @@ public class FTPClient {
      * @throws Exception 读取错误
      */
     public LinkedHashMap<String,String> list(String path) throws Exception{
+        if(socket == null)
+            throw new Exception("连接未建立！");
+
         path = new String(path.getBytes(),serverCoding);
         LinkedHashMap<String,String> contents = new LinkedHashMap<String, String>();
         calDataHostPort();
@@ -172,6 +175,8 @@ public class FTPClient {
      * @throws Exception 读写错误
      */
     public void download(String localpath,String serverpath,Object lock) throws Exception{
+        if(socket == null)
+            throw new Exception("连接未建立！");
 
         localpath = new String(localpath.getBytes(localCoding),serverCoding);
         serverpath = new String(serverpath.getBytes(localCoding),serverCoding);
@@ -227,7 +232,6 @@ public class FTPClient {
         dataSocket.close();
     }
 
-    static boolean isFirst = true;
     /**
      * 上传文件
      * @param localpath 文件的本地地址
@@ -235,6 +239,9 @@ public class FTPClient {
      * @throws Exception 读写错误
      */
     public void upload(String localpath,String serverpath,Object lock) throws Exception{
+        if(socket == null)
+            throw new Exception("连接未建立！");
+
         localpath = new String(localpath.getBytes(localCoding),serverCoding);
         serverpath = new String(serverpath.getBytes(localCoding),serverCoding);
 
