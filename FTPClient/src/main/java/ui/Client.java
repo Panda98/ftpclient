@@ -30,10 +30,6 @@ public class Client {
     static private ExecutorService threadPool;
     private String status;
 
-
-    //private List<String> fileNames;
-    //private List<String> fileTypes;
-
     public String getStatus() {
         return status;
     }
@@ -49,6 +45,7 @@ public class Client {
     }
 
     public Client() {
+        files = new ArrayList<File>();
         initComponents();
     }
 
@@ -138,9 +135,8 @@ public class Client {
     private void buttonConnActionPerformed(ActionEvent e) {
 
         threadPool.execute(new Runnable() {
+            @Override
             public void run() {
-                boolean isRun = false;
-                ConnectRun runner = null;
                 String msg = null;
 
                 try {
@@ -154,11 +150,9 @@ public class Client {
                         return;
                     }
 
-                    final int port = Integer.parseInt(portStr);
+                    int port = Integer.parseInt(portStr);
 
                     msg = performConnect(host, port, username, pwd);
-
-                    isRun = true;
 
                 } catch (NumberFormatException e1) {
                     msg = "端口必须为整数！";
@@ -176,7 +170,16 @@ public class Client {
                         window.dispose();
                         status = "已连接";
 
-                        refreshMainFrame();
+                        listFile("/");
+
+//                        refreshMainFrame();
+
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+//                                refreshMainFrame();
+                                status1.setText(status);
+                            }
+                        });
 
                     }
                 }
@@ -251,7 +254,8 @@ public class Client {
     private void refreshMainFrame() {
         threadPool.execute(new Runnable() {
             public void run() {
-
+                file1 = new File("hello", "FILE");
+                file1.setName("sss");
                 listFile("/");
 
                 status2.setText(status);
@@ -260,8 +264,10 @@ public class Client {
                         status1.setText(status);
                     }
                 });
+                mainPanel.updateUI();
             }
         });
+
     }
 
     private void listFile (String path) {
@@ -273,7 +279,9 @@ public class Client {
             while (iterator.hasNext()) {
                 Map.Entry<String, String> entry = iterator.next();
                 files.add(new File(entry.getKey(), entry.getValue()));
+
             }
+            //table1.setModel(files);
 
         } catch (Exception e) {
             msg = e.getMessage();
@@ -323,6 +331,7 @@ public class Client {
         this.labelPwd = new JLabel();
         this.passwordField = new JPasswordField();
         this.buttonConn = new JButton();
+        this.file1 = new File();
 
         //======== mainPanel ========
         {
@@ -458,6 +467,7 @@ public class Client {
                         this.status1.setOpaque(false);
                         this.status1.setText("\u672a\u8fde\u63a5");
                         this.status1.setHorizontalAlignment(SwingConstants.CENTER);
+                        this.status1.setPreferredSize(new Dimension(47, 16));
                         this.infoBar1.add(this.status1, new GridConstraints(0, 0, 1, 1,
                             GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL,
                             GridConstraints.SIZEPOLICY_FIXED,
@@ -787,6 +797,7 @@ public class Client {
     private JLabel labelPwd;
     private JPasswordField passwordField;
     private JButton buttonConn;
+    private File file1;
     private List<model.File> files;
     private BindingGroup bindingGroup;
     // JFormDesigner - End of variables declaration  //GEN-END:variables

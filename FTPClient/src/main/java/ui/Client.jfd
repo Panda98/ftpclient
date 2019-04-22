@@ -139,10 +139,11 @@ new FormModel {
 						} )
 						add( new FormComponent( "javax.swing.JLabel" ) {
 							name: "status1"
-							"foreground": &Color7 new java.awt.Color( 152, 181, 205, 255 )
+							"foreground": new java.awt.Color( 152, 181, 205, 255 )
 							"opaque": false
 							"text": "未连接"
 							"horizontalAlignment": 0
+							"preferredSize": new java.awt.Dimension( 47, 16 )
 						}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 							"anchor": 2
 							"fill": 1
@@ -242,7 +243,7 @@ new FormModel {
 						} )
 						add( new FormComponent( "javax.swing.JLabel" ) {
 							name: "status2"
-							"foreground": #Color7
+							"foreground": new java.awt.Color( 152, 181, 205, 255 )
 							"opaque": false
 							"text": "未连接"
 							"horizontalAlignment": 0
@@ -448,6 +449,12 @@ new FormModel {
 			"location": new java.awt.Point( 5, 546 )
 			"size": new java.awt.Dimension( 335, 236 )
 		} )
+		add( new FormNonVisual( "model.File" ) {
+			name: "file1"
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 410, 580 )
+			"size": new java.awt.Dimension( 130, 90 )
+		} )
 		add( new FormNonVisual( "java.util.List" ) {
 			name: "files"
 			auxiliary() {
@@ -459,7 +466,6 @@ new FormModel {
 		addBindingGroup( new FormBindingGroup( class org.jdesktop.beansbinding.BindingGroup ) {
 			"name": "bindingGroup"
 			addBinding( new FormBinding( "files", null, "table1", "elements" ) {
-				"updateStrategy": enum org.jdesktop.beansbinding.AutoBinding$UpdateStrategy READ
 				"sourceNullValue": sfield java.util.Collections EMPTY_LIST
 				"subBindings": new com.jformdesigner.model.FormBinding[ new FormBinding( null, "name", null, null ) {
 					"sourcePathType": class java.lang.String
@@ -470,6 +476,7 @@ new FormModel {
 					"columnName": "Type"
 					"columnClass": "java.lang.String"
 				} ]
+				"updateStrategy": enum org.jdesktop.beansbinding.AutoBinding$UpdateStrategy READ
 			} )
 		} )
 	}
