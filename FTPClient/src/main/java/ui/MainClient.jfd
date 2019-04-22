@@ -450,5 +450,28 @@ new FormModel {
 			"location": new java.awt.Point( 450, 705 )
 			"size": new java.awt.Dimension( 103, 50 )
 		} )
+		add( new FormNonVisual( "java.util.List" ) {
+			name: "files"
+			auxiliary() {
+				"JavaCodeGenerator.typeParameters": "model.File"
+			}
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 460, 785 )
+		} )
+		addBindingGroup( new FormBindingGroup( class org.jdesktop.beansbinding.BindingGroup ) {
+			"name": "bindingGroup"
+			addBinding( new FormBinding( "files", null, "table1", "elements" ) {
+				"updateStrategy": enum org.jdesktop.beansbinding.AutoBinding$UpdateStrategy READ
+				"subBindings": new com.jformdesigner.model.FormBinding[ new FormBinding( null, "name", null, null ) {
+					"columnName": "Name"
+					"columnClass": "java.lang.String"
+				}, new FormBinding( null, "type", null, null ) {
+					"columnName": "Type"
+					"columnClass": "java.lang.String"
+				} ]
+			} )
+			addBinding( new FormBinding( "this", "${status}", "status2", "text" ) )
+			addBinding( new FormBinding( "this", "${status}", "status1", "text" ) )
+		} )
 	}
 }

@@ -6,8 +6,12 @@ package ui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.util.*;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,6 +20,9 @@ import javax.swing.border.*;
 import javax.swing.plaf.*;
 import com.intellij.uiDesigner.core.*;
 import model.File;
+import org.jdesktop.beansbinding.*;
+import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
+import org.jdesktop.swingbinding.*;
 import util.FTPClient;
 
 /**
@@ -30,12 +37,89 @@ public class MainClient extends JFrame {
         client = new FTPClient();
     }
 
+    // Java bean for binding
     private String status;
 
-    public MainClient() {
-        initComponents();
+    public String getStatus() {
+        return status;
     }
 
+    public void setStatus(String status) {
+        String oldValue = this.status;
+        this.status = status;
+        changeSupport.firePropertyChange("status", oldValue, status);
+    }
+
+    private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.removePropertyChangeListener(listener);
+    }
+    // Java bean - End
+
+    public MainClient() {
+        files = new ArrayList<File>();
+        initComponents();
+        tabbedPane1.setUI(new FlatTabbedPanedUI());
+        setStatus("未连接");
+    }
+
+    // Util methods
+    private boolean isEmpty(String s) {
+        return  (s==null || s.equals(""));
+    }
+
+    private String performConnect(String host, int port, String username, String pwd) {
+        String msg;
+        try {
+            client.connect(host, port, username, pwd);
+            msg = "连接成功！";
+        } catch (Exception e) {
+            msg = e.getMessage();
+        }
+        return msg;
+    }
+
+    private void refreshMainFrame() {
+        threadPool.execute(new Runnable() {
+            public void run() {
+                listFile("/");
+//                SwingUtilities.invokeLater(new Runnable() {
+//                    public void run() {
+//                        status1.setText(status);
+//                        status2.setText(status);
+//                    }
+//                });
+                mainPanel.updateUI();
+            }
+        });
+
+    }
+
+    private void listFile (String path) {
+        String msg;
+
+        try {
+            LinkedHashMap<String,String> fileList =  client.list(path);
+            Iterator<Map.Entry<String, String>> iterator = fileList.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, String> entry = iterator.next();
+                files.add(new File(entry.getKey(), entry.getValue()));
+            }
+
+        } catch (Exception e) {
+            msg = e.getMessage();
+            JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
+        }
+
+    }
+    // Util methods - End
+
+    // UI methods
     private void buttonConnActionPerformed(ActionEvent e) {
         threadPool.execute(new Runnable() {
             @Override
@@ -63,14 +147,14 @@ public class MainClient extends JFrame {
 
                     if (msg.equals("")) {
                         msg = "连接失败！";
-                        status = "未连接";
+                        setStatus("未连接");
                     }
                     JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
 
                     if (msg.equals("连接成功！") || msg.equals("连接已经建立！") ) {
                         Window window = SwingUtilities.getWindowAncestor(buttonConn);
                         window.dispose();
-                        status = "已连接";
+                        setStatus("已连接");
 
                        refreshMainFrame();
                     }
@@ -100,61 +184,16 @@ public class MainClient extends JFrame {
     }
 
     private void disconnectActionPerformed(ActionEvent e) {
-        client.close();
-    }
-
-    private boolean isEmpty(String s) {
-        return  (s==null || s.equals(""));
-    }
-
-    private String performConnect(String host, int port, String username, String pwd) {
-        String msg;
-        try {
-            client.connect(host, port, username, pwd);
-            msg = "连接成功！";
-        } catch (Exception e) {
-            msg = e.getMessage();
-        }
-        return msg;
-    }
-
-    private void refreshMainFrame() {
         threadPool.execute(new Runnable() {
+            @Override
             public void run() {
-                //file1 = new File("hello", "FILE");
-                //file1.setName("sss");
-                listFile("/");
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        status1.setText(status);
-                        status2.setText(status);
-                    }
-                });
-                mainPanel.updateUI();
+                client.close();
+                JOptionPane.showMessageDialog(null, "断开连接成功！", "提示", JOptionPane.OK_OPTION, null);
+                setStatus("未连接");
             }
         });
-
     }
-
-    private void listFile (String path) {
-        String msg = null;
-
-        try {
-            LinkedHashMap<String,String> fileList =  client.list(path);
-            Iterator<Map.Entry<String, String>> iterator = fileList.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, String> entry = iterator.next();
-                //files.add(new File(entry.getKey(), entry.getValue()));
-
-            }
-            //table1.setModel(files);
-
-        } catch (Exception e) {
-            msg = e.getMessage();
-            JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
-        }
-
-    }
+    // UI methods - End
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
@@ -596,6 +635,27 @@ public class MainClient extends JFrame {
             disconnect.addActionListener(e -> disconnectActionPerformed(e));
             popupMenu1.add(disconnect);
         }
+
+        //---- bindings ----
+        bindingGroup = new BindingGroup();
+        {
+            JTableBinding binding = SwingBindings.createJTableBinding(UpdateStrategy.READ,
+                files, table1);
+            binding.addColumnBinding(BeanProperty.create("name"))
+                .setColumnName("Name")
+                .setColumnClass(String.class);
+            binding.addColumnBinding(BeanProperty.create("type"))
+                .setColumnName("Type")
+                .setColumnClass(String.class);
+            bindingGroup.addBinding(binding);
+        }
+        bindingGroup.addBinding(Bindings.createAutoBinding(UpdateStrategy.READ_WRITE,
+            this, ELProperty.create("${status}"),
+            status2, BeanProperty.create("text")));
+        bindingGroup.addBinding(Bindings.createAutoBinding(UpdateStrategy.READ_WRITE,
+            this, ELProperty.create("${status}"),
+            status1, BeanProperty.create("text")));
+        bindingGroup.bind();
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
@@ -638,5 +698,7 @@ public class MainClient extends JFrame {
     private JPopupMenu popupMenu1;
     private JMenuItem connect;
     private JMenuItem disconnect;
+    private List<model.File> files;
+    private BindingGroup bindingGroup;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
