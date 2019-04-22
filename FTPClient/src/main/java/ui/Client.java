@@ -307,7 +307,7 @@ public class Client {
         this.fileNumber1 = new JLabel();
         this.status1 = new JLabel();
         this.Upload = new JPanel();
-        this.fileList2 = new JList();
+        this.fileList2 = new JList<>();
         this.fileChooser = new JPanel();
         this.addFilesOrDropTextPane = new JLabel();
         this.infoBar2 = new JPanel();
@@ -492,12 +492,14 @@ public class Client {
                     ((GridBagLayout)this.Upload.getLayout()).rowWeights = new double[] {0.0, 0.0, 1.0, 0.0, 1.0E-4};
 
                     //---- fileList2 ----
-                    this.fileList2.setModel(new AbstractListModel() {
+                    this.fileList2.setModel(new AbstractListModel<String>() {
                         String[] values = {
 
                         };
+                        @Override
                         public int getSize() { return this.values.length; }
-                        public Object getElementAt(int i) { return this.values[i]; }
+                        @Override
+                        public String getElementAt(int i) { return this.values[i]; }
                     });
                     this.Upload.add(this.fileList2, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
@@ -626,20 +628,12 @@ public class Client {
 
             //---- connect ----
             this.connect.setText("\u8fde\u63a5");
-            this.connect.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    connectActionPerformed(e);
-                }
-            });
+            this.connect.addActionListener(e -> connectActionPerformed(e));
             this.popupMenu1.add(this.connect);
 
             //---- disconnect ----
             this.disconnect.setText("\u65ad\u5f00\u8fde\u63a5");
-            this.disconnect.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    disconnectActionPerformed(e);
-                }
-            });
+            this.disconnect.addActionListener(e -> disconnectActionPerformed(e));
             this.popupMenu1.add(this.disconnect);
         }
 
@@ -726,11 +720,7 @@ public class Client {
             //---- buttonConn ----
             this.buttonConn.setText("\u8fde\u63a5");
             this.buttonConn.setBackground(Color.white);
-            this.buttonConn.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    buttonConnActionPerformed(e);
-                }
-            });
+            this.buttonConn.addActionListener(e -> buttonConnActionPerformed(e));
             this.panel1.add(this.buttonConn, new GridBagConstraints(0, 3, 4, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE,
                 new Insets(0, 0, 0, 0), 0, 0));
@@ -773,7 +763,7 @@ public class Client {
     private JLabel fileNumber1;
     private JLabel status1;
     private JPanel Upload;
-    private JList fileList2;
+    private JList<String> fileList2;
     private JPanel fileChooser;
     private JLabel addFilesOrDropTextPane;
     private JPanel infoBar2;
