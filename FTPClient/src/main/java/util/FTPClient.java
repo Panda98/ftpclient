@@ -20,6 +20,9 @@ public class FTPClient {
 
     private double progress;
 
+    private final String localCoding = "GB2312";
+    private final String serverCoding = "ISO-8859-1";
+
 
     /**
      *  连接ftp服务器
@@ -35,7 +38,7 @@ public class FTPClient {
 
         socket = new Socket(host,port);
         reader =new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+        writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(),serverCoding));
 
         String msg = reader.readLine();
         System.out.println(msg);
@@ -65,11 +68,12 @@ public class FTPClient {
 
     /**
      *  列出目录下文件及文件夹
-     * @param parentPath 目录名，若为根目录，则传入"/"
+     * @param path 目录名，若为根目录，则传入"/"
      * @return key-文件名/文件夹名，value-类型（文件夹为DIR，其余为FILE）
      * @throws Exception 读取错误
      */
-    public LinkedHashMap<String,String> list(String parentPath) throws Exception{
+    public LinkedHashMap<String,String> list(String path) throws Exception{
+        path = new String(path.getBytes(),serverCoding);
         LinkedHashMap<String,String> contents = new LinkedHashMap<String, String>();
         calDataHostPort();
 
@@ -83,7 +87,7 @@ public class FTPClient {
 //            System.out.println(response);
 //        }
 //        sendMsg("LIST");
-        sendMsg("NLST "+parentPath);
+        sendMsg("NLST "+path);
         response = reader.readLine();
         System.out.println(response);
 
@@ -91,7 +95,7 @@ public class FTPClient {
         response = reader.readLine();
         System.out.println(response);
 
-        BufferedReader dataReader = new BufferedReader(new InputStreamReader(dataSocket.getInputStream(),"GB2312"));
+        BufferedReader dataReader = new BufferedReader(new InputStreamReader(dataSocket.getInputStream(),localCoding));
         String line;
         while ((line = dataReader.readLine())!= null){
             int index = line.lastIndexOf(' ');
@@ -161,6 +165,8 @@ public class FTPClient {
      */
     public void download(String localpath,String serverpath,Object lock) throws Exception{
 
+        localpath = new String(localpath.getBytes(localCoding),serverCoding);
+        serverpath = new String(serverpath.getBytes(localCoding),serverCoding);
         calDataHostPort();
 
         long length = 0;
@@ -221,7 +227,8 @@ public class FTPClient {
      * @throws Exception 读写错误
      */
     public void upload(String localpath,String serverpath,Object lock) throws Exception{
-
+        localpath = new String(localpath.getBytes(localCoding),serverCoding);
+        serverpath = new String(serverpath.getBytes(localCoding),serverCoding);
 
         calDataHostPort();
 
