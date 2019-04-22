@@ -459,7 +459,6 @@ new FormModel {
 		addBindingGroup( new FormBindingGroup( class org.jdesktop.beansbinding.BindingGroup ) {
 			"name": "bindingGroup"
 			addBinding( new FormBinding( "files", null, "table1", "elements" ) {
-				"updateStrategy": enum org.jdesktop.beansbinding.AutoBinding$UpdateStrategy READ
 				"sourceNullValue": sfield java.util.Collections EMPTY_LIST
 				"subBindings": new com.jformdesigner.model.FormBinding[ new FormBinding( null, "name", null, null ) {
 					"sourcePathType": class java.lang.String
@@ -470,6 +469,7 @@ new FormModel {
 					"columnName": "Type"
 					"columnClass": "java.lang.String"
 				} ]
+				"updateStrategy": enum org.jdesktop.beansbinding.AutoBinding$UpdateStrategy READ
 			} )
 		} )
 	}

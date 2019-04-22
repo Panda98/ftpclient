@@ -1,6 +1,7 @@
 package model;
 
-import com.jformdesigner.S;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
 /**
  * @author yiner
@@ -24,7 +25,9 @@ public class File {
     }
 
     public void setName(String name) {
+        String oldName = this.name;
         this.name = name;
+        changeSupport.firePropertyChange("name", oldName, name);
     }
 
     public String getType() {
@@ -32,6 +35,18 @@ public class File {
     }
 
     public void setType(String type) {
+        String oldType = this.type;
         this.type = type;
+        changeSupport.firePropertyChange("type", oldType, type);
+    }
+
+    private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.removePropertyChangeListener(listener);
     }
 }

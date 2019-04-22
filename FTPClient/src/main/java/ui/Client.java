@@ -30,10 +30,6 @@ public class Client {
     static private ExecutorService threadPool;
     private String status;
 
-
-    //private List<String> fileNames;
-    //private List<String> fileTypes;
-
     public String getStatus() {
         return status;
     }
@@ -49,6 +45,7 @@ public class Client {
     }
 
     public Client() {
+        files = new ArrayList<File>();
         initComponents();
     }
 
@@ -139,8 +136,8 @@ public class Client {
 
         threadPool.execute(new Runnable() {
             public void run() {
-                boolean isRun = false;
-                ConnectRun runner = null;
+                //boolean isRun = false;
+                //ConnectRun runner = null;
                 String msg = null;
 
                 try {
@@ -154,11 +151,11 @@ public class Client {
                         return;
                     }
 
-                    final int port = Integer.parseInt(portStr);
+                    int port = Integer.parseInt(portStr);
 
                     msg = performConnect(host, port, username, pwd);
 
-                    isRun = true;
+                    //isRun = true;
 
                 } catch (NumberFormatException e1) {
                     msg = "端口必须为整数！";
