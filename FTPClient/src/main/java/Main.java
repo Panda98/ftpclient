@@ -68,7 +68,7 @@ public class Main {
         }
         String path = "";
         try {
-            path = new String("test\\2.txt".getBytes(),"ISO-8859-1");
+            path = new String("test\\1\\新建文件夹\\1.txt");
         }catch (Exception e){
             e.printStackTrace();
         }
