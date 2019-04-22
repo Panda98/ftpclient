@@ -49,7 +49,7 @@ public class Main {
             try{
 //            client.upload("C:\\Users\\Pan\\Desktop\\hello.txt","test\\hello.txt");
 //            client.list("/");
-                client.download(localpath,serverpath,c);
+//                client.download(localpath,serverpath,c);
             }catch (Exception e){
                 e.printStackTrace();
             }finally {
@@ -62,7 +62,7 @@ public class Main {
         thread.start();
         try{
             thread.join();
-            HashMap hashMap = client.list("/");
+            HashMap hashMap = client.list("/test");
         }catch (Exception e){
             e.printStackTrace();
         }
