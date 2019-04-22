@@ -41,8 +41,8 @@ public class FTPClient {
         System.out.println(msg);
 
 
-        writer.println("USER "+username);
-        writer.flush();
+
+        sendMsg("USER "+username);
         String response = reader.readLine();
         System.out.println(response);
 
@@ -50,8 +50,7 @@ public class FTPClient {
             socket = null;
             throw new Exception("用户名不正确！");
         }
-        writer.println("PASS "+password);
-        writer.flush();
+        sendMsg("PASS "+password);
         response = reader.readLine();
         System.out.println(response);
         if(!response.startsWith("230 ")){
@@ -78,27 +77,27 @@ public class FTPClient {
 
         String response;
 
-        if(!parentPath.equals("/")){
-            writer.println("CWD "+parentPath);
-            writer.flush();
-
-            if(!(response = reader.readLine()).startsWith("250 "))
-                throw new Exception("没有该文件夹");
-            System.out.println(response);
-        }
-
-        writer.println("LIST");
-        writer.flush();
+//        if(!parentPath.equals("/")){
+//            sendMsg("CWD "+parentPath);
+//
+//            if(!(response = reader.readLine()).startsWith("250 "))
+//                throw new Exception("没有该文件夹");
+//            System.out.println(response);
+//        }
+//        sendMsg("LIST");
+        sendMsg("NLST "+parentPath);
+        response = reader.readLine();
+        System.out.println(response);
 
         dataSocket = new Socket(dataHost,dataPort);
         response = reader.readLine();
         System.out.println(response);
 
-        BufferedReader dataReader = new BufferedReader(new InputStreamReader(dataSocket.getInputStream()));
+        BufferedReader dataReader = new BufferedReader(new InputStreamReader(dataSocket.getInputStream(),"GB2312"));
         String line;
         while ((line = dataReader.readLine())!= null){
             int index = line.lastIndexOf(' ');
-            String s = line.substring(index+1,line.length());
+            String s = new String(line.substring(index+1,line.length()).getBytes());
             String type = "FILE";
             if(line.contains("DIR"))
                 type = "DIR";
@@ -275,6 +274,9 @@ public class FTPClient {
      * @param lock
      * @return
      */
+
+
+
     public double getProgress(String filepath,Object lock){
         double i = 0;
         synchronized (lock) {
