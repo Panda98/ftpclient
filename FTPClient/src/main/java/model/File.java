@@ -1,5 +1,7 @@
 package model;
 
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
@@ -7,7 +9,7 @@ import java.beans.PropertyChangeSupport;
  * @author yiner
  * @since 2019-04-22
  */
-public class File {
+public class File implements TableModel {
     private String name;
     private String type;
 
@@ -48,5 +50,41 @@ public class File {
 
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         changeSupport.removePropertyChangeListener(listener);
+    }
+
+    public int getRowCount() {
+        return 0;
+    }
+
+    public int getColumnCount() {
+        return 0;
+    }
+
+    public String getColumnName(int columnIndex) {
+        return null;
+    }
+
+    public Class<?> getColumnClass(int columnIndex) {
+        return null;
+    }
+
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return false;
+    }
+
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        return null;
+    }
+
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+
+    }
+
+    public void addTableModelListener(TableModelListener l) {
+
+    }
+
+    public void removeTableModelListener(TableModelListener l) {
+
     }
 }
