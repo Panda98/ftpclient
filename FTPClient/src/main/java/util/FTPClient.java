@@ -116,14 +116,22 @@ public class FTPClient {
      */
     public void close(){
         try{
-            if(socket != null)
+            if(socket != null) {
                 socket.close();
-            if(reader!= null)
+                socket = null;
+            }
+            if(reader!= null) {
                 reader.close();
-            if(writer != null)
+                reader = null;
+            }
+            if(writer != null) {
                 writer.close();
-            if(outputStream != null)
+                writer = null;
+            }
+            if(outputStream != null) {
                 outputStream.close();
+                outputStream = null;
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
