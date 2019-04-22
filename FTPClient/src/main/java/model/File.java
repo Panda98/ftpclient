@@ -1,7 +1,7 @@
 package model;
 
 import javax.swing.event.TableModelListener;
-import javax.swing.table.TableModel;
+import javax.swing.table.DefaultTableModel;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
@@ -9,7 +9,7 @@ import java.beans.PropertyChangeSupport;
  * @author yiner
  * @since 2019-04-22
  */
-public class File implements TableModel {
+public class File {
     private String name;
     private String type;
 
@@ -52,39 +52,23 @@ public class File implements TableModel {
         changeSupport.removePropertyChangeListener(listener);
     }
 
-    public int getRowCount() {
-        return 0;
-    }
+//    private static final String[] columns={"文件名","类型","进度","按钮"};//所有的列字段
 
-    public int getColumnCount() {
-        return 0;
-    }
+//    public File(Object[][] data){
+//        super(data, columns);
+//    }
+//
+//    @Override
+//    public boolean isCellEditable(int row, int column) {
+//        // TODO Auto-generated method stub
+//        //重写isCellEditable方法，设置是否可以对表格进行编辑，也可以设置某行或者列，可以编辑或者不可以编辑
+//        return super.isCellEditable(row, column);
+//    }
+//
+//    @Override
+//    public void setValueAt(Object arg0, int arg1, int arg2) {
+//        // TODO Auto-generated method stub
+//        super.setValueAt(arg0, arg1, arg2);
+//    }
 
-    public String getColumnName(int columnIndex) {
-        return null;
-    }
-
-    public Class<?> getColumnClass(int columnIndex) {
-        return null;
-    }
-
-    public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return false;
-    }
-
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        return null;
-    }
-
-    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-
-    }
-
-    public void addTableModelListener(TableModelListener l) {
-
-    }
-
-    public void removeTableModelListener(TableModelListener l) {
-
-    }
 }

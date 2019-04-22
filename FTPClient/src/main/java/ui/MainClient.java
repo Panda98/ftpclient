@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.plaf.*;
+import javax.swing.table.*;
 import com.intellij.uiDesigner.core.*;
 import model.File;
 import org.jdesktop.beansbinding.*;
@@ -36,6 +37,9 @@ public class MainClient extends JFrame {
         threadPool = Executors.newCachedThreadPool();
         client = new FTPClient();
     }
+
+    private static final String[] columns={"文件名","类型","进度","按钮"};//所有的列字段
+    Object[][] dataObjects;
 
     // Java bean for binding
     private String status;
@@ -88,12 +92,6 @@ public class MainClient extends JFrame {
         threadPool.execute(new Runnable() {
             public void run() {
                 listFile("/");
-//                SwingUtilities.invokeLater(new Runnable() {
-//                    public void run() {
-//                        status1.setText(status);
-//                        status2.setText(status);
-//                    }
-//                });
                 mainPanel.updateUI();
             }
         });
@@ -110,6 +108,9 @@ public class MainClient extends JFrame {
                 Map.Entry<String, String> entry = iterator.next();
                 files.add(new File(entry.getKey(), entry.getValue()));
             }
+            //dataObjects = files.toArray();
+            //table1.setModel(new DefaultTableModel(dataObjects, columns));
+
 
         } catch (Exception e) {
             msg = e.getMessage();
@@ -124,6 +125,9 @@ public class MainClient extends JFrame {
         threadPool.execute(new Runnable() {
             @Override
             public void run() {
+                // 连接前先断开之前的连接
+                client.close();
+
                 String msg = null;
 
                 try {
@@ -334,6 +338,9 @@ public class MainClient extends JFrame {
                         table1.setColumnSelectionAllowed(true);
                         table1.setRowHeight(40);
                         table1.setRowMargin(5);
+                        table1.setGridColor(Color.red);
+                        table1.setMinimumSize(new Dimension(30, 20));
+                        table1.setModel(new DefaultTableModel());
                         scrollPane1.setViewportView(table1);
                     }
                     Download.add(scrollPane1, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
@@ -638,17 +645,6 @@ public class MainClient extends JFrame {
 
         //---- bindings ----
         bindingGroup = new BindingGroup();
-        {
-            JTableBinding binding = SwingBindings.createJTableBinding(UpdateStrategy.READ,
-                files, table1);
-            binding.addColumnBinding(BeanProperty.create("name"))
-                .setColumnName("Name")
-                .setColumnClass(String.class);
-            binding.addColumnBinding(BeanProperty.create("type"))
-                .setColumnName("Type")
-                .setColumnClass(String.class);
-            bindingGroup.addBinding(binding);
-        }
         bindingGroup.addBinding(Bindings.createAutoBinding(UpdateStrategy.READ_WRITE,
             this, ELProperty.create("${status}"),
             status2, BeanProperty.create("text")));

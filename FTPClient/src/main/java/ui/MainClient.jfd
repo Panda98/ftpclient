@@ -93,6 +93,9 @@ new FormModel {
 								"columnSelectionAllowed": true
 								"rowHeight": 40
 								"rowMargin": 5
+								"gridColor": sfield java.awt.Color red
+								"minimumSize": new java.awt.Dimension( 30, 20 )
+								"model": new com.jformdesigner.model.SwingTableModel( new java.util.Vector, new java.util.Vector, new java.util.Vector, new java.util.Vector, new java.util.Vector )
 							} )
 						}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
 							"gridy": 1
@@ -460,16 +463,6 @@ new FormModel {
 		} )
 		addBindingGroup( new FormBindingGroup( class org.jdesktop.beansbinding.BindingGroup ) {
 			"name": "bindingGroup"
-			addBinding( new FormBinding( "files", null, "table1", "elements" ) {
-				"updateStrategy": enum org.jdesktop.beansbinding.AutoBinding$UpdateStrategy READ
-				"subBindings": new com.jformdesigner.model.FormBinding[ new FormBinding( null, "name", null, null ) {
-					"columnName": "Name"
-					"columnClass": "java.lang.String"
-				}, new FormBinding( null, "type", null, null ) {
-					"columnName": "Type"
-					"columnClass": "java.lang.String"
-				} ]
-			} )
 			addBinding( new FormBinding( "this", "${status}", "status2", "text" ) )
 			addBinding( new FormBinding( "this", "${status}", "status1", "text" ) )
 		} )
