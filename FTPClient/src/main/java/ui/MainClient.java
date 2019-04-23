@@ -5,9 +5,16 @@
 package ui;
 
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -17,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.filechooser.FileSystemView;
 import javax.swing.plaf.*;
 import javax.swing.table.*;
 import com.intellij.uiDesigner.core.*;
@@ -94,7 +102,14 @@ public class MainClient extends JFrame {
         initComponents();
         tabbedPane1.setUI(new FlatTabbedPanedUI());
         setStatus("未连接");
+
+        DropTargetListener handler = new DragHandler(this);
+        DropTarget dropTarget = new DropTarget(addFilesLabel,DnDConstants.ACTION_MOVE,
+                handler, true, null );
     }
+
+
+
 
     // Util methods
     private boolean isEmpty(String s) {
@@ -111,6 +126,34 @@ public class MainClient extends JFrame {
         }
         return msg;
     }
+
+    private String performDownload(String path) {
+        String msg;
+        char[] lock = new char[0];
+        try {
+            client.download(path, uploadPath, lock);
+            msg = "下载成功！";
+        } catch (Exception e) {
+            msg = e.getMessage();
+        }
+        return msg;
+    }
+
+    private String performUpload(String path) {
+        String msg;
+        char[] lock = new char[0];
+        int index = path.lastIndexOf("/");
+        String name = path.substring(index);
+        String serverPath = uploadPath + name;
+        try {
+            client.upload(path, serverPath, lock);
+            msg = "上传成功！";
+        } catch (Exception e) {
+            msg = e.getMessage();
+        }
+        return msg;
+    }
+
 
     private void refreshMainFrame() {
         threadPool.execute(new Runnable() {
@@ -249,6 +292,11 @@ public class MainClient extends JFrame {
     }
 
     private void disconnectActionPerformed(ActionEvent e) {
+        if (getStatus().equals("未连接")) {
+            JOptionPane.showMessageDialog(null, "未连接到服务器！", "提示", JOptionPane.OK_OPTION, null);
+            return;
+        }
+
         threadPool.execute(new Runnable() {
             @Override
             public void run() {
@@ -317,6 +365,51 @@ public class MainClient extends JFrame {
             setUploadPath(filepath);
         }
     }
+
+    private void addFilesMouseClicked(MouseEvent e) {
+        if (getStatus().equals("未连接")) {
+            JOptionPane.showMessageDialog(null, "请先连接服务器！", "提示", JOptionPane.OK_OPTION, null);
+            return;
+        }
+
+        int result;
+        final String path;
+        JFileChooser fileChooser = new JFileChooser();
+        FileSystemView fsv = FileSystemView.getFileSystemView();  //注意了，这里重要的一句
+        System.out.println(fsv.getHomeDirectory());                //得到桌面路径
+        fileChooser.setCurrentDirectory(fsv.getHomeDirectory());
+        fileChooser.setDialogTitle("请选择要上传的文件...");
+        fileChooser.setApproveButtonText("确定");
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        result = fileChooser.showOpenDialog(null);
+        if (JFileChooser.APPROVE_OPTION == result) {
+            path=fileChooser.getSelectedFile().getPath();
+            System.out.println("path: "+path);
+            threadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    String msg = performUpload(path);
+                    JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
+                }
+            });
+        }
+    }
+
+    public void dragFilePerform(String path){
+        if (getStatus().equals("未连接")) {
+            JOptionPane.showMessageDialog(null, "请先连接服务器！", "提示", JOptionPane.OK_OPTION, null);
+            return;
+        }
+
+        System.out.println("path: "+path);
+        threadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                String msg = performUpload(path);
+                JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
+            }
+        });
+    }
     // UI methods - End
 
     private void initComponents() {
@@ -339,7 +432,7 @@ public class MainClient extends JFrame {
         staticLabel1 = new JLabel();
         Upload = new JPanel();
         fileChooser = new JPanel();
-        addFilesOrDropTextPane = new JLabel();
+        addFilesLabel = new JLabel();
         infoBar2 = new JPanel();
         fileSize2 = new JLabel();
         status2 = new JLabel();
@@ -596,18 +689,24 @@ public class MainClient extends JFrame {
                         fileChooser.setBackground(Color.white);
                         fileChooser.setLayout(new GridLayout());
 
-                        //---- addFilesOrDropTextPane ----
-                        addFilesOrDropTextPane.setBackground(Color.white);
-                        addFilesOrDropTextPane.setFont(addFilesOrDropTextPane.getFont().deriveFont(17f));
-                        addFilesOrDropTextPane.setForeground(new Color(152, 181, 205));
-                        addFilesOrDropTextPane.setInheritsPopupMenu(false);
-                        addFilesOrDropTextPane.setText("\u70b9\u51fb\u6216\u62d6\u52a8\u6dfb\u52a0\u6587\u4ef6");
-                        addFilesOrDropTextPane.setHorizontalAlignment(SwingConstants.CENTER);
-                        addFilesOrDropTextPane.setBorder(new LineBorder(new Color(152, 181, 205, 191), 3, true));
-                        addFilesOrDropTextPane.setAlignmentY(0.0F);
-                        addFilesOrDropTextPane.setIcon(new ImageIcon(getClass().getResource("/ui/icon/file.png")));
-                        addFilesOrDropTextPane.setIconTextGap(8);
-                        fileChooser.add(addFilesOrDropTextPane);
+                        //---- addFilesLabel ----
+                        addFilesLabel.setBackground(Color.white);
+                        addFilesLabel.setFont(addFilesLabel.getFont().deriveFont(17f));
+                        addFilesLabel.setForeground(new Color(152, 181, 205));
+                        addFilesLabel.setInheritsPopupMenu(false);
+                        addFilesLabel.setText("\u70b9\u51fb\u6216\u62d6\u52a8\u6dfb\u52a0\u6587\u4ef6");
+                        addFilesLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                        addFilesLabel.setBorder(new LineBorder(new Color(152, 181, 205, 191), 3, true));
+                        addFilesLabel.setAlignmentY(0.0F);
+                        addFilesLabel.setIcon(new ImageIcon(getClass().getResource("/ui/icon/file.png")));
+                        addFilesLabel.setIconTextGap(8);
+                        addFilesLabel.addMouseListener(new MouseAdapter() {
+                            @Override
+                            public void mouseClicked(MouseEvent e) {
+                                addFilesMouseClicked(e);
+                            }
+                        });
+                        fileChooser.add(addFilesLabel);
                     }
                     Upload.add(fileChooser, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
@@ -921,7 +1020,7 @@ public class MainClient extends JFrame {
     private JLabel staticLabel1;
     private JPanel Upload;
     private JPanel fileChooser;
-    private JLabel addFilesOrDropTextPane;
+    private JLabel addFilesLabel;
     private JPanel infoBar2;
     private JLabel fileSize2;
     private JLabel status2;

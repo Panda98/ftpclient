@@ -220,7 +220,7 @@ new FormModel {
 							name: "fileChooser"
 							"background": new java.awt.Color( 255, 255, 255, 255 )
 							add( new FormComponent( "javax.swing.JLabel" ) {
-								name: "addFilesOrDropTextPane"
+								name: "addFilesLabel"
 								"background": new java.awt.Color( 255, 255, 255, 255 )
 								"font": new com.jformdesigner.model.SwingDerivedFont( null, 0, 17, true )
 								"foreground": new java.awt.Color( 152, 181, 205, 255 )
@@ -231,6 +231,7 @@ new FormModel {
 								"alignmentY": 0.0f
 								"icon": new com.jformdesigner.model.SwingIcon( 0, "/ui/icon/file.png" )
 								"iconTextGap": 8
+								addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseClicked", "addFilesMouseClicked", true ) )
 							} )
 						}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
 							"gridy": 1
