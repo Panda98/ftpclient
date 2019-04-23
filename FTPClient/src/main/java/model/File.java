@@ -1,7 +1,5 @@
 package model;
 
-import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableModel;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
@@ -9,17 +7,47 @@ import java.beans.PropertyChangeSupport;
  * @author yiner
  * @since 2019-04-22
  */
+
+enum State {
+    IDLE, WORKING, STOPPING
+}
+
 public class File {
     private String name;
     private String type;
+    private Double progress;
+    private State state;
 
-    public File() {
-
+    public String getPath() {
+        return path;
     }
 
-    public File (String name, String type) {
-        this.name = name;
+    public void setPath(String path) {
+        String oldPath = this.path;
+        this.path = path;
+        setName(pareseName(path));
+        changeSupport.firePropertyChange("path", oldPath, path);
+    }
+
+    private String path;
+
+    public File (String path, String type) {
+        this.path = path;
+        this.name = pareseName(path);
         this.type = type;
+        this.progress = 0.0;
+        this.state = State.IDLE;
+    }
+
+    /**
+     * Parse the name from the path.
+     * @param path the absolute path of file/directory
+     * @return the name of the file/directory
+     */
+    private String pareseName(String path) {
+        String[] arr = path.split("/");
+        int len = arr.length;
+        return arr[len-1];
     }
 
     public String getName() {
@@ -42,6 +70,26 @@ public class File {
         changeSupport.firePropertyChange("type", oldType, type);
     }
 
+    public Double getProgress() {
+        return progress;
+    }
+
+    public void setProgress(Double progress) {
+        Double oldProgress = this.progress;
+        this.progress = progress;
+        changeSupport.firePropertyChange("progress", oldProgress, progress);
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        State oldState = this.state;
+        this.state = state;
+        changeSupport.firePropertyChange("state", oldState, state);
+    }
+
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -51,24 +99,4 @@ public class File {
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         changeSupport.removePropertyChangeListener(listener);
     }
-
-//    private static final String[] columns={"文件名","类型","进度","按钮"};//所有的列字段
-
-//    public File(Object[][] data){
-//        super(data, columns);
-//    }
-//
-//    @Override
-//    public boolean isCellEditable(int row, int column) {
-//        // TODO Auto-generated method stub
-//        //重写isCellEditable方法，设置是否可以对表格进行编辑，也可以设置某行或者列，可以编辑或者不可以编辑
-//        return super.isCellEditable(row, column);
-//    }
-//
-//    @Override
-//    public void setValueAt(Object arg0, int arg1, int arg2) {
-//        // TODO Auto-generated method stub
-//        super.setValueAt(arg0, arg1, arg2);
-//    }
-
 }

@@ -39,10 +39,12 @@ public class MainClient extends JFrame {
     }
 
     private static final String[] columns={"文件名","类型","进度","按钮"};//所有的列字段
-    Object[][] dataObjects;
+    private Object[][] dataObjects;
 
     // Java bean for binding
     private String status;
+    private String downloadPath;
+    private String uploadPath;
 
     public String getStatus() {
         return status;
@@ -53,6 +55,28 @@ public class MainClient extends JFrame {
         this.status = status;
         changeSupport.firePropertyChange("status", oldValue, status);
     }
+
+    public String getDownloadPath() {
+        return downloadPath;
+    }
+
+    public void setDownloadPath(String downloadPath) {
+        String oldPath = this.downloadPath;
+        this.downloadPath = downloadPath;
+        changeSupport.firePropertyChange("downloadPath", oldPath, downloadPath);
+    }
+
+    public String getUploadPath() {
+        return uploadPath;
+    }
+
+    public void setUploadPath(String uploadPath) {
+        String oldPath = this.uploadPath;
+        this.uploadPath = uploadPath;
+        changeSupport.firePropertyChange("uploadPath", oldPath, uploadPath);
+    }
+
+
 
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
@@ -92,7 +116,7 @@ public class MainClient extends JFrame {
         threadPool.execute(new Runnable() {
             public void run() {
                 listFile("/");
-                mainPanel.updateUI();
+                //mainPanel.updateUI();
             }
         });
 
@@ -103,14 +127,9 @@ public class MainClient extends JFrame {
 
         try {
             LinkedHashMap<String,String> fileList =  client.list(path);
-            Iterator<Map.Entry<String, String>> iterator = fileList.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, String> entry = iterator.next();
-                files.add(new File(entry.getKey(), entry.getValue()));
-            }
-            //dataObjects = files.toArray();
-            //table1.setModel(new DefaultTableModel(dataObjects, columns));
-
+            createDataModel(fileList);
+            table1.setModel(new DefaultTableModel(dataObjects, columns));
+            setDownloadPath(path);
 
         } catch (Exception e) {
             msg = e.getMessage();
@@ -118,6 +137,23 @@ public class MainClient extends JFrame {
         }
 
     }
+
+    private void createDataModel(LinkedHashMap<String,String> fileList){
+        Iterator<Map.Entry<String, String>> iterator = fileList.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
+            files.add(new File(entry.getKey(), entry.getValue()));
+        }
+        int len = files.size();
+        dataObjects = new Object[len][4];
+        for (int i=0; i<len; i++) {
+            dataObjects[i][0] = files.get(i).getName();
+            dataObjects[i][1] = files.get(i).getType();
+            dataObjects[i][2] = files.get(i).getProgress();
+            dataObjects[i][3] = files.get(i).getState();
+        }
+    }
+
     // Util methods - End
 
     // UI methods
@@ -208,23 +244,30 @@ public class MainClient extends JFrame {
         filePath1 = new JPanel();
         buttonBack1 = new JButton();
         button2Root1 = new JButton();
+        path1 = new JLabel();
         scrollPane1 = new JScrollPane();
         table1 = new JTable();
         infoBar1 = new JPanel();
         fileSize1 = new JLabel();
-        fileNumber1 = new JLabel();
         status1 = new JLabel();
+        fileNumPanel1 = new JPanel();
+        fileNumber1 = new JLabel();
+        staticLabel1 = new JLabel();
         Upload = new JPanel();
-        fileList2 = new JList<>();
         fileChooser = new JPanel();
         addFilesOrDropTextPane = new JLabel();
         infoBar2 = new JPanel();
         fileSize2 = new JLabel();
-        fileNumber2 = new JLabel();
         status2 = new JLabel();
+        fileNumPanel2 = new JPanel();
+        fileNumber2 = new JLabel();
+        staticLabel2 = new JLabel();
         filePath2 = new JPanel();
         buttonBack2 = new JButton();
         button2Root2 = new JButton();
+        path2 = new JLabel();
+        scrollPane2 = new JScrollPane();
+        table2 = new JTable();
         panel1 = new JPanel();
         labelConn = new JLabel();
         labelHost = new JLabel();
@@ -275,6 +318,7 @@ public class MainClient extends JFrame {
                 tabbedPane1.setFocusable(true);
                 tabbedPane1.setToolTipText("");
                 tabbedPane1.setComponentPopupMenu(popupMenu1);
+                tabbedPane1.setForeground(new Color(64, 73, 105));
 
                 //======== Download ========
                 {
@@ -283,7 +327,7 @@ public class MainClient extends JFrame {
                     Download.setComponentPopupMenu(popupMenu1);
                     Download.setLayout(new GridBagLayout());
                     ((GridBagLayout)Download.getLayout()).columnWidths = new int[] {0, 0};
-                    ((GridBagLayout)Download.getLayout()).rowHeights = new int[] {65, 105, 30, 0};
+                    ((GridBagLayout)Download.getLayout()).rowHeights = new int[] {55, 105, 30, 0};
                     ((GridBagLayout)Download.getLayout()).columnWeights = new double[] {0.01, 1.0E-4};
                     ((GridBagLayout)Download.getLayout()).rowWeights = new double[] {0.0, 1.0, 0.0, 1.0E-4};
 
@@ -296,9 +340,9 @@ public class MainClient extends JFrame {
                         filePath1.setAlignmentX(0.0F);
                         filePath1.setAlignmentY(0.0F);
                         filePath1.setLayout(new GridBagLayout());
-                        ((GridBagLayout)filePath1.getLayout()).columnWidths = new int[] {50, 50, 46, 55, 66, 0, 0};
-                        ((GridBagLayout)filePath1.getLayout()).rowHeights = new int[] {60, 0};
-                        ((GridBagLayout)filePath1.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4};
+                        ((GridBagLayout)filePath1.getLayout()).columnWidths = new int[] {40, 50, 372, 0};
+                        ((GridBagLayout)filePath1.getLayout()).rowHeights = new int[] {50, 0};
+                        ((GridBagLayout)filePath1.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 1.0E-4};
                         ((GridBagLayout)filePath1.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
 
                         //---- buttonBack1 ----
@@ -326,10 +370,21 @@ public class MainClient extends JFrame {
                         filePath1.add(button2Root1, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
                             GridBagConstraints.CENTER, GridBagConstraints.NONE,
                             new Insets(0, 0, 0, 0), 0, 0));
+
+                        //---- path1 ----
+                        path1.setText("/");
+                        path1.setFont(new Font(".SF NS Text", Font.PLAIN, 22));
+                        path1.setForeground(new Color(64, 73, 105));
+                        path1.setBackground(Color.white);
+                        path1.setMaximumSize(new Dimension(6, 20));
+                        path1.setMinimumSize(new Dimension(6, 20));
+                        filePath1.add(path1, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                            new Insets(2, 10, 2, 10), 0, 0));
                     }
                     Download.add(filePath1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                        new Insets(5, 5, 10, 5), 0, 0));
+                        new Insets(0, 0, 5, 0), 0, 0));
 
                     //======== scrollPane1 ========
                     {
@@ -365,17 +420,6 @@ public class MainClient extends JFrame {
                             GridConstraints.SIZEPOLICY_FIXED,
                             null, new Dimension(150, 30), null));
 
-                        //---- fileNumber1 ----
-                        fileNumber1.setForeground(new Color(152, 181, 205));
-                        fileNumber1.setOpaque(false);
-                        fileNumber1.setText("0\u4e2a\u6587\u4ef6");
-                        fileNumber1.setHorizontalAlignment(SwingConstants.CENTER);
-                        infoBar1.add(fileNumber1, new GridConstraints(0, 1, 1, 1,
-                            GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL,
-                            GridConstraints.SIZEPOLICY_FIXED,
-                            GridConstraints.SIZEPOLICY_FIXED,
-                            null, new Dimension(150, 30), null));
-
                         //---- status1 ----
                         status1.setForeground(new Color(152, 181, 205));
                         status1.setOpaque(false);
@@ -387,6 +431,42 @@ public class MainClient extends JFrame {
                             GridConstraints.SIZEPOLICY_FIXED,
                             GridConstraints.SIZEPOLICY_FIXED,
                             null, new Dimension(150, 30), null));
+
+                        //======== fileNumPanel1 ========
+                        {
+                            fileNumPanel1.setBackground(Color.white);
+                            fileNumPanel1.setOpaque(false);
+                            fileNumPanel1.setAlignmentX(0.0F);
+                            fileNumPanel1.setAlignmentY(0.0F);
+                            fileNumPanel1.setLayout(new GridBagLayout());
+                            ((GridBagLayout)fileNumPanel1.getLayout()).columnWidths = new int[] {61, 87, 0};
+                            ((GridBagLayout)fileNumPanel1.getLayout()).rowHeights = new int[] {21, 0};
+                            ((GridBagLayout)fileNumPanel1.getLayout()).columnWeights = new double[] {0.0, 0.0, 1.0E-4};
+                            ((GridBagLayout)fileNumPanel1.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
+
+                            //---- fileNumber1 ----
+                            fileNumber1.setForeground(new Color(152, 181, 205));
+                            fileNumber1.setOpaque(false);
+                            fileNumber1.setText("0");
+                            fileNumber1.setHorizontalAlignment(SwingConstants.RIGHT);
+                            fileNumPanel1.add(fileNumber1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                                new Insets(0, 0, 0, 0), 0, 0));
+
+                            //---- staticLabel1 ----
+                            staticLabel1.setForeground(new Color(152, 181, 205));
+                            staticLabel1.setOpaque(false);
+                            staticLabel1.setText("\u4e2a\u6587\u4ef6");
+                            staticLabel1.setHorizontalAlignment(SwingConstants.LEFT);
+                            fileNumPanel1.add(staticLabel1, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+                                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                                new Insets(0, 0, 0, 0), 0, 0));
+                        }
+                        infoBar1.add(fileNumPanel1, new GridConstraints(0, 1, 1, 1,
+                            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
+                            GridConstraints.SIZEPOLICY_FIXED,
+                            GridConstraints.SIZEPOLICY_FIXED,
+                            null, null, null));
                     }
                     Download.add(infoBar1, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
@@ -401,23 +481,9 @@ public class MainClient extends JFrame {
                     Upload.setComponentPopupMenu(popupMenu1);
                     Upload.setLayout(new GridBagLayout());
                     ((GridBagLayout)Upload.getLayout()).columnWidths = new int[] {0, 0};
-                    ((GridBagLayout)Upload.getLayout()).rowHeights = new int[] {60, 90, 80, 30, 0};
+                    ((GridBagLayout)Upload.getLayout()).rowHeights = new int[] {55, 95, 85, 30, 0};
                     ((GridBagLayout)Upload.getLayout()).columnWeights = new double[] {0.01, 1.0E-4};
                     ((GridBagLayout)Upload.getLayout()).rowWeights = new double[] {0.0, 0.0, 1.0, 0.0, 1.0E-4};
-
-                    //---- fileList2 ----
-                    fileList2.setModel(new AbstractListModel<String>() {
-                        String[] values = {
-
-                        };
-                        @Override
-                        public int getSize() { return values.length; }
-                        @Override
-                        public String getElementAt(int i) { return values[i]; }
-                    });
-                    Upload.add(fileList2, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                        new Insets(0, 0, 0, 0), 0, 0));
 
                     //======== fileChooser ========
                     {
@@ -439,7 +505,7 @@ public class MainClient extends JFrame {
                     }
                     Upload.add(fileChooser, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                        new Insets(0, 20, 0, 20), 0, 0));
+                        new Insets(0, 20, 5, 20), 0, 0));
 
                     //======== infoBar2 ========
                     {
@@ -459,17 +525,6 @@ public class MainClient extends JFrame {
                             GridConstraints.SIZEPOLICY_FIXED,
                             null, new Dimension(150, 30), null));
 
-                        //---- fileNumber2 ----
-                        fileNumber2.setForeground(new Color(152, 181, 205));
-                        fileNumber2.setOpaque(false);
-                        fileNumber2.setText("0\u4e2a\u6587\u4ef6");
-                        fileNumber2.setHorizontalAlignment(SwingConstants.CENTER);
-                        infoBar2.add(fileNumber2, new GridConstraints(0, 1, 1, 1,
-                            GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL,
-                            GridConstraints.SIZEPOLICY_FIXED,
-                            GridConstraints.SIZEPOLICY_FIXED,
-                            null, new Dimension(150, 30), null));
-
                         //---- status2 ----
                         status2.setForeground(new Color(152, 181, 205));
                         status2.setOpaque(false);
@@ -480,6 +535,42 @@ public class MainClient extends JFrame {
                             GridConstraints.SIZEPOLICY_FIXED,
                             GridConstraints.SIZEPOLICY_FIXED,
                             null, new Dimension(150, 30), null));
+
+                        //======== fileNumPanel2 ========
+                        {
+                            fileNumPanel2.setBackground(Color.white);
+                            fileNumPanel2.setOpaque(false);
+                            fileNumPanel2.setAlignmentX(0.0F);
+                            fileNumPanel2.setAlignmentY(0.0F);
+                            fileNumPanel2.setLayout(new GridBagLayout());
+                            ((GridBagLayout)fileNumPanel2.getLayout()).columnWidths = new int[] {61, 87, 0};
+                            ((GridBagLayout)fileNumPanel2.getLayout()).rowHeights = new int[] {21, 0};
+                            ((GridBagLayout)fileNumPanel2.getLayout()).columnWeights = new double[] {0.0, 0.0, 1.0E-4};
+                            ((GridBagLayout)fileNumPanel2.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
+
+                            //---- fileNumber2 ----
+                            fileNumber2.setForeground(new Color(152, 181, 205));
+                            fileNumber2.setOpaque(false);
+                            fileNumber2.setText("0");
+                            fileNumber2.setHorizontalAlignment(SwingConstants.RIGHT);
+                            fileNumPanel2.add(fileNumber2, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                                new Insets(0, 0, 0, 0), 0, 0));
+
+                            //---- staticLabel2 ----
+                            staticLabel2.setForeground(new Color(152, 181, 205));
+                            staticLabel2.setOpaque(false);
+                            staticLabel2.setText("\u4e2a\u6587\u4ef6");
+                            staticLabel2.setHorizontalAlignment(SwingConstants.LEFT);
+                            fileNumPanel2.add(staticLabel2, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+                                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                                new Insets(0, 0, 0, 0), 0, 0));
+                        }
+                        infoBar2.add(fileNumPanel2, new GridConstraints(0, 1, 1, 1,
+                            GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
+                            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+                            null, null, null));
                     }
                     Upload.add(infoBar2, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
@@ -494,9 +585,9 @@ public class MainClient extends JFrame {
                         filePath2.setAlignmentX(0.0F);
                         filePath2.setAlignmentY(0.0F);
                         filePath2.setLayout(new GridBagLayout());
-                        ((GridBagLayout)filePath2.getLayout()).columnWidths = new int[] {50, 50, 46, 55, 66, 0};
-                        ((GridBagLayout)filePath2.getLayout()).rowHeights = new int[] {60, 0};
-                        ((GridBagLayout)filePath2.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4};
+                        ((GridBagLayout)filePath2.getLayout()).columnWidths = new int[] {40, 50, 379, 0};
+                        ((GridBagLayout)filePath2.getLayout()).rowHeights = new int[] {54, 0};
+                        ((GridBagLayout)filePath2.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 1.0E-4};
                         ((GridBagLayout)filePath2.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
 
                         //---- buttonBack2 ----
@@ -524,10 +615,32 @@ public class MainClient extends JFrame {
                         filePath2.add(button2Root2, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
                             GridBagConstraints.CENTER, GridBagConstraints.NONE,
                             new Insets(0, 0, 0, 0), 0, 0));
+
+                        //---- path2 ----
+                        path2.setText("/");
+                        path2.setFont(new Font(".SF NS Text", Font.PLAIN, 22));
+                        path2.setForeground(new Color(64, 73, 105));
+                        path2.setBackground(Color.white);
+                        path2.setMaximumSize(new Dimension(6, 20));
+                        path2.setMinimumSize(new Dimension(6, 20));
+                        filePath2.add(path2, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
+                            GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+                            new Insets(2, 10, 2, 10), 0, 0));
                     }
                     Upload.add(filePath2, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                        new Insets(5, 5, 5, 5), 0, 0));
+                        new Insets(0, 5, 5, 5), 0, 0));
+
+                    //======== scrollPane2 ========
+                    {
+
+                        //---- table2 ----
+                        table2.setGridColor(Color.white);
+                        scrollPane2.setViewportView(table2);
+                    }
+                    Upload.add(scrollPane2, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
+                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                        new Insets(10, 0, 5, 0), 0, 0));
                 }
                 tabbedPane1.addTab("\u4e0a\u4f20", new ImageIcon(getClass().getResource("/ui/icon/upload_selected.png")), Upload);
                 tabbedPane1.setDisabledIconAt(1, new ImageIcon(getClass().getResource("/ui/icon/upload_unselected.png.png")));
@@ -651,6 +764,18 @@ public class MainClient extends JFrame {
         bindingGroup.addBinding(Bindings.createAutoBinding(UpdateStrategy.READ_WRITE,
             this, ELProperty.create("${status}"),
             status1, BeanProperty.create("text")));
+        bindingGroup.addBinding(Bindings.createAutoBinding(UpdateStrategy.READ_WRITE,
+            this, ELProperty.create("${downloadPath}"),
+            path1, BeanProperty.create("text")));
+        bindingGroup.addBinding(Bindings.createAutoBinding(UpdateStrategy.READ_WRITE,
+            this, ELProperty.create("${uploadPath}"),
+            path2, BeanProperty.create("text")));
+        bindingGroup.addBinding(Bindings.createAutoBinding(UpdateStrategy.READ_WRITE,
+            this, ELProperty.create("${files.size}"),
+            fileNumber1, BeanProperty.create("text")));
+        bindingGroup.addBinding(Bindings.createAutoBinding(UpdateStrategy.READ_WRITE,
+            this, ELProperty.create("${files.size}"),
+            fileNumber2, BeanProperty.create("text")));
         bindingGroup.bind();
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
@@ -663,23 +788,30 @@ public class MainClient extends JFrame {
     private JPanel filePath1;
     private JButton buttonBack1;
     private JButton button2Root1;
+    private JLabel path1;
     private JScrollPane scrollPane1;
     private JTable table1;
     private JPanel infoBar1;
     private JLabel fileSize1;
-    private JLabel fileNumber1;
     private JLabel status1;
+    private JPanel fileNumPanel1;
+    private JLabel fileNumber1;
+    private JLabel staticLabel1;
     private JPanel Upload;
-    private JList<String> fileList2;
     private JPanel fileChooser;
     private JLabel addFilesOrDropTextPane;
     private JPanel infoBar2;
     private JLabel fileSize2;
-    private JLabel fileNumber2;
     private JLabel status2;
+    private JPanel fileNumPanel2;
+    private JLabel fileNumber2;
+    private JLabel staticLabel2;
     private JPanel filePath2;
     private JButton buttonBack2;
     private JButton button2Root2;
+    private JLabel path2;
+    private JScrollPane scrollPane2;
+    private JTable table2;
     private JPanel panel1;
     private JLabel labelConn;
     private JLabel labelHost;
