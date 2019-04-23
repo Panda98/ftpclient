@@ -63,6 +63,7 @@ new FormModel {
 								"margin": &Insets0 new java.awt.Insets( 0, 0, 0, 0 )
 								"iconTextGap": 0
 								"preferredSize": &Dimension3 new java.awt.Dimension( 40, 40 )
+								addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseClicked", "buttonBack1MouseClicked", true ) )
 							}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
 								"hAlign": 0
 								"vAlign": 0
@@ -85,7 +86,7 @@ new FormModel {
 							add( new FormComponent( "javax.swing.JLabel" ) {
 								name: "path1"
 								"text": "/"
-								"font": &Font0 new java.awt.Font( ".SF NS Text", 0, 22 )
+								"font": new java.awt.Font( ".SF NS Text", 0, 20 )
 								"foreground": &Color3 new java.awt.Color( 64, 73, 105, 255 )
 								"background": &ColorUIResource0 new javax.swing.plaf.ColorUIResource( 255, 255, 255 )
 								"maximumSize": &Dimension7 new java.awt.Dimension( 6, 20 )
@@ -101,14 +102,25 @@ new FormModel {
 						} )
 						add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
 							name: "scrollPane1"
+							"background": #ColorUIResource0
+							"inheritsPopupMenu": true
+							"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
+							"foreground": #ColorUIResource0
 							add( new FormComponent( "javax.swing.JTable" ) {
-								name: "table1"
-								"columnSelectionAllowed": true
+								name: "downloadTable"
 								"rowHeight": 40
 								"rowMargin": 5
-								"gridColor": sfield java.awt.Color red
+								"gridColor": sfield java.awt.Color white
 								"minimumSize": new java.awt.Dimension( 30, 20 )
 								"model": new com.jformdesigner.model.SwingTableModel( new java.util.Vector, new java.util.Vector, new java.util.Vector, new java.util.Vector, new java.util.Vector )
+								"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
+								"foreground": new java.awt.Color( 64, 73, 105, 255 )
+								"intercellSpacing": new java.awt.Dimension( 2, 5 )
+								"inheritsPopupMenu": true
+								"selectionBackground": new java.awt.Color( 234, 245, 255, 255 )
+								"selectionForeground": new java.awt.Color( 64, 73, 105, 255 )
+								"font": new java.awt.Font( ".SF NS Text", 0, 15 )
+								addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseClicked", "downloadTableMouseClicked", true ) )
 							} )
 						}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
 							"gridy": 1
@@ -322,6 +334,7 @@ new FormModel {
 								"margin": #Insets0
 								"iconTextGap": 0
 								"preferredSize": #Dimension3
+								addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseClicked", "buttonBack2MouseClicked", true ) )
 							}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
 								"hAlign": 0
 								"vAlign": 0
@@ -344,7 +357,7 @@ new FormModel {
 							add( new FormComponent( "javax.swing.JLabel" ) {
 								name: "path2"
 								"text": "/"
-								"font": #Font0
+								"font": new java.awt.Font( ".SF NS Text", 0, 22 )
 								"foreground": #Color3
 								"background": #ColorUIResource0
 								"maximumSize": #Dimension7
@@ -361,9 +374,20 @@ new FormModel {
 						} )
 						add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
 							name: "scrollPane2"
+							"background": #ColorUIResource0
+							"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
+							"inheritsPopupMenu": true
 							add( new FormComponent( "javax.swing.JTable" ) {
-								name: "table2"
+								name: "uploadTable"
 								"gridColor": #ColorUIResource0
+								"inheritsPopupMenu": true
+								"selectionBackground": new java.awt.Color( 234, 245, 255, 255 )
+								"selectionForeground": new java.awt.Color( 64, 73, 105, 255 )
+								"foreground": new java.awt.Color( 64, 73, 105, 255 )
+								"font": new java.awt.Font( ".SF NS Text", 0, 15 )
+								"rowHeight": 40
+								"rowMargin": 5
+								addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseClicked", "uploadTableMouseClicked", true ) )
 							} )
 						}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
 							"gridy": 2
@@ -512,22 +536,12 @@ new FormModel {
 			"location": new java.awt.Point( 450, 705 )
 			"size": new java.awt.Dimension( 103, 50 )
 		} )
-		add( new FormNonVisual( "java.util.List" ) {
-			name: "files"
-			auxiliary() {
-				"JavaCodeGenerator.typeParameters": "model.File"
-			}
-		}, new FormLayoutConstraints( null ) {
-			"location": new java.awt.Point( 460, 785 )
-		} )
 		addBindingGroup( new FormBindingGroup( class org.jdesktop.beansbinding.BindingGroup ) {
 			"name": "bindingGroup"
 			addBinding( new FormBinding( "this", "${status}", "status2", "text" ) )
 			addBinding( new FormBinding( "this", "${status}", "status1", "text" ) )
 			addBinding( new FormBinding( "this", "${downloadPath}", "path1", "text" ) )
 			addBinding( new FormBinding( "this", "${uploadPath}", "path2", "text" ) )
-			addBinding( new FormBinding( "this", "${files.size}", "fileNumber1", "text" ) )
-			addBinding( new FormBinding( "this", "${files.size}", "fileNumber2", "text" ) )
 		} )
 	}
 }

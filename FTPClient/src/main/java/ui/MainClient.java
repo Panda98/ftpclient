@@ -23,7 +23,6 @@ import com.intellij.uiDesigner.core.*;
 import model.File;
 import org.jdesktop.beansbinding.*;
 import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
-import org.jdesktop.swingbinding.*;
 import util.FTPClient;
 
 /**
@@ -38,8 +37,9 @@ public class MainClient extends JFrame {
         client = new FTPClient();
     }
 
-    private static final String[] columns={"文件名","类型","进度","按钮"};//所有的列字段
-    private Object[][] dataObjects;
+    private static final String[] columns={"","","",""};//所有的列字段
+    private List<model.File> downloadFiles;
+    private List<model.File> uploadFiles;
 
     // Java bean for binding
     private String status;
@@ -77,7 +77,6 @@ public class MainClient extends JFrame {
     }
 
 
-
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -90,7 +89,8 @@ public class MainClient extends JFrame {
     // Java bean - End
 
     public MainClient() {
-        files = new ArrayList<File>();
+        downloadFiles = new ArrayList<>();
+        uploadFiles = new ArrayList<>();
         initComponents();
         tabbedPane1.setUI(new FlatTabbedPanedUI());
         setStatus("未连接");
@@ -115,43 +115,68 @@ public class MainClient extends JFrame {
     private void refreshMainFrame() {
         threadPool.execute(new Runnable() {
             public void run() {
-                listFile("/");
-                //mainPanel.updateUI();
+                listFile("/", downloadTable, downloadFiles);
+                setDownloadPath("/");
+                listFile("/", uploadTable, uploadFiles);
+                setUploadPath("/");
             }
         });
 
     }
 
-    private void listFile (String path) {
+    private void listFile (String path, JTable table, List<model.File> files) {
         String msg;
-
         try {
             LinkedHashMap<String,String> fileList =  client.list(path);
-            createDataModel(fileList);
-            table1.setModel(new DefaultTableModel(dataObjects, columns));
-            setDownloadPath(path);
-
+            createDataModel(fileList, table, files);
         } catch (Exception e) {
             msg = e.getMessage();
             JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
         }
-
     }
 
-    private void createDataModel(LinkedHashMap<String,String> fileList){
+    private void createDataModel(LinkedHashMap<String,String> fileList,
+                                 JTable table, List<model.File> files){
         Iterator<Map.Entry<String, String>> iterator = fileList.entrySet().iterator();
+        files.clear();
         while (iterator.hasNext()) {
             Map.Entry<String, String> entry = iterator.next();
             files.add(new File(entry.getKey(), entry.getValue()));
         }
         int len = files.size();
-        dataObjects = new Object[len][4];
+        Object[][] dataObjects = new Object[len][4];
         for (int i=0; i<len; i++) {
             dataObjects[i][0] = files.get(i).getName();
             dataObjects[i][1] = files.get(i).getType();
             dataObjects[i][2] = files.get(i).getProgress();
             dataObjects[i][3] = files.get(i).getState();
         }
+        updateDataModel(table, dataObjects);
+
+        table.getColumnModel().getColumn(3).setCellRenderer(new FileButtonRenderer());
+        table.getColumnModel().getColumn(3).setCellEditor(new FileButtonCellEditor());
+        table.getTableHeader().setVisible(false);
+    }
+
+
+
+    private void clearDataModel(JTable table, List<model.File> files) {
+        files.clear();
+        Object[][] dataObjects = new Object[0][0];
+        updateDataModel(table, dataObjects);
+    }
+
+    private void updateDataModel(JTable table, Object[][] dataObjects) {
+        table.setModel(new DefaultTableModel(dataObjects, columns){
+            @Override
+            public boolean isCellEditable(int row,int column){
+                return column == 3;
+            }
+            @Override
+            public void setValueAt(Object value, int row, int column){
+                dataObjects[row][column]= value;
+            }
+        });
     }
 
     // Util methods - End
@@ -228,10 +253,69 @@ public class MainClient extends JFrame {
             @Override
             public void run() {
                 client.close();
-                JOptionPane.showMessageDialog(null, "断开连接成功！", "提示", JOptionPane.OK_OPTION, null);
+                JOptionPane.showMessageDialog(null, "断开连接成功！",
+                        "提示", JOptionPane.OK_OPTION, null);
+
+                clearDataModel(downloadTable, downloadFiles);
+                clearDataModel(uploadTable, uploadFiles);
+                setDownloadPath("");
+                setUploadPath("");
+
                 setStatus("未连接");
             }
         });
+    }
+
+    private void downloadTableMouseClicked(MouseEvent e) {
+        int row = downloadTable.getSelectedRow();
+        String filepath = downloadFiles.get(row).getPath();
+        String type = downloadFiles.get(row).getType();
+        if(type.equals("DIR")){
+            threadPool.execute(new Runnable() {
+                public void run() {
+                    listFile(filepath, downloadTable, downloadFiles);
+                }
+            });
+            setDownloadPath(filepath);
+        }
+    }
+
+    private void buttonBack1MouseClicked(MouseEvent e) {
+        String currPath = path1.getText();
+        int index = currPath.lastIndexOf("/");
+        String parentPath = index == 0?"/":currPath.substring(0,index);
+        threadPool.execute(new Runnable() {
+            public void run() {
+                listFile(parentPath, downloadTable, downloadFiles);
+            }
+        });
+        setDownloadPath(parentPath);
+    }
+
+    private void buttonBack2MouseClicked(MouseEvent e) {
+        String currPath = path2.getText();
+        int index = currPath.lastIndexOf("/");
+        String parentPath = index == 0?"/":currPath.substring(0,index);
+        threadPool.execute(new Runnable() {
+            public void run() {
+                listFile(parentPath, uploadTable, uploadFiles);
+            }
+        });
+        setUploadPath(parentPath);
+    }
+
+    private void uploadTableMouseClicked(MouseEvent e) {
+        int row = uploadTable.getSelectedRow();
+        String filepath = uploadFiles.get(row).getPath();
+        String type = uploadFiles.get(row).getType();
+        if(type.equals("DIR")){
+            threadPool.execute(new Runnable() {
+                public void run() {
+                    listFile(filepath, uploadTable, uploadFiles);
+                }
+            });
+            setUploadPath(filepath);
+        }
     }
     // UI methods - End
 
@@ -246,7 +330,7 @@ public class MainClient extends JFrame {
         button2Root1 = new JButton();
         path1 = new JLabel();
         scrollPane1 = new JScrollPane();
-        table1 = new JTable();
+        downloadTable = new JTable();
         infoBar1 = new JPanel();
         fileSize1 = new JLabel();
         status1 = new JLabel();
@@ -267,7 +351,7 @@ public class MainClient extends JFrame {
         button2Root2 = new JButton();
         path2 = new JLabel();
         scrollPane2 = new JScrollPane();
-        table2 = new JTable();
+        uploadTable = new JTable();
         panel1 = new JPanel();
         labelConn = new JLabel();
         labelHost = new JLabel();
@@ -354,6 +438,12 @@ public class MainClient extends JFrame {
                         buttonBack1.setMargin(new Insets(0, 0, 0, 0));
                         buttonBack1.setIconTextGap(0);
                         buttonBack1.setPreferredSize(new Dimension(40, 40));
+                        buttonBack1.addMouseListener(new MouseAdapter() {
+                            @Override
+                            public void mouseClicked(MouseEvent e) {
+                                buttonBack1MouseClicked(e);
+                            }
+                        });
                         filePath1.add(buttonBack1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
                             GridBagConstraints.CENTER, GridBagConstraints.NONE,
                             new Insets(0, 0, 0, 0), 0, 0));
@@ -373,7 +463,7 @@ public class MainClient extends JFrame {
 
                         //---- path1 ----
                         path1.setText("/");
-                        path1.setFont(new Font(".SF NS Text", Font.PLAIN, 22));
+                        path1.setFont(new Font(".SF NS Text", Font.PLAIN, 20));
                         path1.setForeground(new Color(64, 73, 105));
                         path1.setBackground(Color.white);
                         path1.setMaximumSize(new Dimension(6, 20));
@@ -388,15 +478,31 @@ public class MainClient extends JFrame {
 
                     //======== scrollPane1 ========
                     {
+                        scrollPane1.setBackground(Color.white);
+                        scrollPane1.setInheritsPopupMenu(true);
+                        scrollPane1.setBorder(null);
+                        scrollPane1.setForeground(Color.white);
 
-                        //---- table1 ----
-                        table1.setColumnSelectionAllowed(true);
-                        table1.setRowHeight(40);
-                        table1.setRowMargin(5);
-                        table1.setGridColor(Color.red);
-                        table1.setMinimumSize(new Dimension(30, 20));
-                        table1.setModel(new DefaultTableModel());
-                        scrollPane1.setViewportView(table1);
+                        //---- downloadTable ----
+                        downloadTable.setRowHeight(40);
+                        downloadTable.setRowMargin(5);
+                        downloadTable.setGridColor(Color.white);
+                        downloadTable.setMinimumSize(new Dimension(30, 20));
+                        downloadTable.setModel(new DefaultTableModel());
+                        downloadTable.setBorder(null);
+                        downloadTable.setForeground(new Color(64, 73, 105));
+                        downloadTable.setIntercellSpacing(new Dimension(2, 5));
+                        downloadTable.setInheritsPopupMenu(true);
+                        downloadTable.setSelectionBackground(new Color(234, 245, 255));
+                        downloadTable.setSelectionForeground(new Color(64, 73, 105));
+                        downloadTable.setFont(new Font(".SF NS Text", Font.PLAIN, 15));
+                        downloadTable.addMouseListener(new MouseAdapter() {
+                            @Override
+                            public void mouseClicked(MouseEvent e) {
+                                downloadTableMouseClicked(e);
+                            }
+                        });
+                        scrollPane1.setViewportView(downloadTable);
                     }
                     Download.add(scrollPane1, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
@@ -599,6 +705,12 @@ public class MainClient extends JFrame {
                         buttonBack2.setMargin(new Insets(0, 0, 0, 0));
                         buttonBack2.setIconTextGap(0);
                         buttonBack2.setPreferredSize(new Dimension(40, 40));
+                        buttonBack2.addMouseListener(new MouseAdapter() {
+                            @Override
+                            public void mouseClicked(MouseEvent e) {
+                                buttonBack2MouseClicked(e);
+                            }
+                        });
                         filePath2.add(buttonBack2, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
                             GridBagConstraints.CENTER, GridBagConstraints.NONE,
                             new Insets(0, 0, 0, 0), 0, 0));
@@ -633,10 +745,26 @@ public class MainClient extends JFrame {
 
                     //======== scrollPane2 ========
                     {
+                        scrollPane2.setBackground(Color.white);
+                        scrollPane2.setBorder(null);
+                        scrollPane2.setInheritsPopupMenu(true);
 
-                        //---- table2 ----
-                        table2.setGridColor(Color.white);
-                        scrollPane2.setViewportView(table2);
+                        //---- uploadTable ----
+                        uploadTable.setGridColor(Color.white);
+                        uploadTable.setInheritsPopupMenu(true);
+                        uploadTable.setSelectionBackground(new Color(234, 245, 255));
+                        uploadTable.setSelectionForeground(new Color(64, 73, 105));
+                        uploadTable.setForeground(new Color(64, 73, 105));
+                        uploadTable.setFont(new Font(".SF NS Text", Font.PLAIN, 15));
+                        uploadTable.setRowHeight(40);
+                        uploadTable.setRowMargin(5);
+                        uploadTable.addMouseListener(new MouseAdapter() {
+                            @Override
+                            public void mouseClicked(MouseEvent e) {
+                                uploadTableMouseClicked(e);
+                            }
+                        });
+                        scrollPane2.setViewportView(uploadTable);
                     }
                     Upload.add(scrollPane2, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
@@ -770,12 +898,6 @@ public class MainClient extends JFrame {
         bindingGroup.addBinding(Bindings.createAutoBinding(UpdateStrategy.READ_WRITE,
             this, ELProperty.create("${uploadPath}"),
             path2, BeanProperty.create("text")));
-        bindingGroup.addBinding(Bindings.createAutoBinding(UpdateStrategy.READ_WRITE,
-            this, ELProperty.create("${files.size}"),
-            fileNumber1, BeanProperty.create("text")));
-        bindingGroup.addBinding(Bindings.createAutoBinding(UpdateStrategy.READ_WRITE,
-            this, ELProperty.create("${files.size}"),
-            fileNumber2, BeanProperty.create("text")));
         bindingGroup.bind();
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
@@ -790,7 +912,7 @@ public class MainClient extends JFrame {
     private JButton button2Root1;
     private JLabel path1;
     private JScrollPane scrollPane1;
-    private JTable table1;
+    private JTable downloadTable;
     private JPanel infoBar1;
     private JLabel fileSize1;
     private JLabel status1;
@@ -811,7 +933,7 @@ public class MainClient extends JFrame {
     private JButton button2Root2;
     private JLabel path2;
     private JScrollPane scrollPane2;
-    private JTable table2;
+    private JTable uploadTable;
     private JPanel panel1;
     private JLabel labelConn;
     private JLabel labelHost;
@@ -826,7 +948,6 @@ public class MainClient extends JFrame {
     private JPopupMenu popupMenu1;
     private JMenuItem connect;
     private JMenuItem disconnect;
-    private List<model.File> files;
     private BindingGroup bindingGroup;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
