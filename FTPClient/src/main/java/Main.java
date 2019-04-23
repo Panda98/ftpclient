@@ -47,9 +47,9 @@ public class Main {
         @Override
         public void run() {
             try{
-//            client.upload("C:\\Users\\Pan\\Desktop\\hello.txt","test\\hello.txt");
+            client.upload("C:\\Users\\Pan\\Desktop\\chapter3.pdf","",c);
 //            client.list("/");
-                client.download(localpath,serverpath,c);
+//                client.download(localpath,serverpath,c);
             }catch (Exception e){
                 e.printStackTrace();
             }finally {
@@ -58,6 +58,26 @@ public class Main {
         }
     }
     public static void main(String[] args){
+        test();
+
+    }
+    public static void test(){
+        String host = "192.168.2.7";
+        int port = 21;
+        String username = "Experiment";
+        String password = "123456";
+
+        client = new FTPClient();
+        try{
+            client.connect(host,port,username,password);
+            client.upload("C:\\Users\\Pan\\Desktop\\chapter3.pdf","chapter3.pdf",c);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void thread(){
         Thread thread = new Thread(new Child());
         thread.start();
         try{
@@ -94,6 +114,5 @@ public class Main {
             }
 
         }
-
     }
 }
