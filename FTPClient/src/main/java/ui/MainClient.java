@@ -130,8 +130,11 @@ public class MainClient extends JFrame {
     private String performDownload(String path) {
         String msg;
         char[] lock = new char[0];
+        int index = path.lastIndexOf("/");
+        String name = path.substring(index);
+        String serverPath = uploadPath + name;
         try {
-            client.download(path, uploadPath, lock);
+            client.download(path, downloadPath, lock);
             msg = "下载成功！";
         } catch (Exception e) {
             msg = e.getMessage();
@@ -197,7 +200,7 @@ public class MainClient extends JFrame {
         updateDataModel(table, dataObjects);
 
         table.getColumnModel().getColumn(3).setCellRenderer(new FileButtonRenderer());
-        table.getColumnModel().getColumn(3).setCellEditor(new FileButtonCellEditor());
+        table.getColumnModel().getColumn(3).setCellEditor(new FileButtonCellEditor(this));
         table.getTableHeader().setVisible(false);
     }
 
@@ -409,6 +412,34 @@ public class MainClient extends JFrame {
                 JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
             }
         });
+    }
+
+    public void downloadClicked() {
+        int row = downloadTable.getSelectedRow();
+        String fileName = downloadFiles.get(row).getPath();
+
+        int result;
+        final String path;
+        JFileChooser fileChooser = new JFileChooser();
+        FileSystemView fsv = FileSystemView.getFileSystemView();  //注意了，这里重要的一句
+        System.out.println(fsv.getHomeDirectory());                //得到桌面路径
+        fileChooser.setCurrentDirectory(fsv.getHomeDirectory());
+        fileChooser.setDialogTitle("请选择要上传的文件...");
+        fileChooser.setApproveButtonText("确定");
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        result = fileChooser.showOpenDialog(null);
+        if (JFileChooser.APPROVE_OPTION == result) {
+            path=fileChooser.getSelectedFile().getPath();
+            System.out.println("path: "+path);
+            threadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    String msg = performDownload(path);
+                    JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
+                }
+            });
+        }
+
     }
     // UI methods - End
 

@@ -55,21 +55,11 @@ public class DragHandler implements DropTargetListener{
 
     protected boolean acceptableType; // Indicates whether data is acceptable
 
-//    private String filePath;
-
     private MainClient delegate;
 
     public DragHandler(MainClient delegate){
         this.delegate = delegate;
     }
-//
-//    public String getFilePath() {
-//        return filePath;
-//    }
-//
-//    public void setFilePath(String filePath) {
-//        this.filePath = filePath;
-//    }
 
     // interface methods
     @Override
@@ -179,7 +169,6 @@ public class DragHandler implements DropTargetListener{
         File transferFile = (File) fileList.get(0);
         final URI transferURL = transferFile.toURI();
         DnDUtils.debugPrintln("File URL is " + transferURL);
-//        setFilePath(transferURL.getPath());
         String path = transferURL.getPath();
         delegate.dragFilePerform(path);
         return true;

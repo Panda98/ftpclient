@@ -18,6 +18,10 @@ import java.util.EventObject;
  */
 public class FileButtonCellEditor extends JButton implements TableCellEditor{
 
+    private MainClient delegate;
+
+    private int row;
+
     //EventListenerList:保存EventListener 列表的类。
     private EventListenerList listenerList = new EventListenerList();
     //ChangeEvent用于通知感兴趣的参与者事件源中的状态已发生更改。
@@ -36,8 +40,9 @@ public class FileButtonCellEditor extends JButton implements TableCellEditor{
         this.state = state;
     }
 
-    public FileButtonCellEditor() {
+    public FileButtonCellEditor(MainClient delegate) {
         super();
+        this.delegate = delegate;
         this.setSize(40, 40);
         this.setIcon(downloadIcon);
         this.setBackground(Color.white);
@@ -57,6 +62,7 @@ public class FileButtonCellEditor extends JButton implements TableCellEditor{
             case IDLE:
                 this.setIcon(pauseIcon);
                 setState(State.WORKING);
+                delegate.downloadClicked();
                 break;
             case WORKING:
                 this.setIcon(playIcon);
@@ -76,6 +82,8 @@ public class FileButtonCellEditor extends JButton implements TableCellEditor{
         setSize(40, 40);
         setBackground(Color.white);
         setBorder(null);
+        this.row = row;
+        setState((State)value);
         return this;
     }
 
