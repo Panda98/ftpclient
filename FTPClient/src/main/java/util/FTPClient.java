@@ -93,6 +93,8 @@ public class FTPClient {
         sendMsg("NLST "+path);
         response = reader.readLine();
         System.out.println(response);
+        if(response.startsWith("451 "))
+            return contents;
 
         dataSocket = new Socket(dataHost,dataPort);
         response = reader.readLine();
@@ -101,7 +103,6 @@ public class FTPClient {
         BufferedReader dataReader = new BufferedReader(new InputStreamReader(dataSocket.getInputStream(),localCoding));
         String line;
         while ((line = dataReader.readLine())!= null){
-            int index = line.lastIndexOf(' ');
             String type = "DIR";
             if(line.contains("."))
                 type = "FILE";
@@ -181,11 +182,7 @@ public class FTPClient {
         serverpath = new String(serverpath.getBytes(localCoding),serverCoding);
         calDataHostPort();
 
-        long length = 0;
-        sendMsg("SIZE "+serverpath);
-        String response = reader.readLine();
-        System.out.println(response);
-        length = Integer.parseInt(response.substring(4,response.length()));
+        long length = getSize(serverpath);
         System.out.println("文件总长："+length);
 
         File file = new File(localpath);
@@ -198,7 +195,7 @@ public class FTPClient {
 
         sendMsg("REST "+startIndex);
 
-        response = reader.readLine();
+        String response = reader.readLine();
         System.out.println(response);
 
         sendMsg("RETR "+serverpath);
@@ -248,16 +245,10 @@ public class FTPClient {
 
         sendMsg("SIZE "+serverpath);
 
-        int size= 0;
-
-        String response = reader.readLine();
-        System.out.println(response);
-        if(!response.startsWith("550")){
-            size = Integer.parseInt(response.substring(4,response.length()));
-        }
+        long size= getSize(serverpath);
 
         sendMsg("APPE "+serverpath);
-        response = reader.readLine();
+        String response = reader.readLine();
         System.out.println(response);
 
         dataSocket = new Socket(dataHost,dataPort);
@@ -271,7 +262,7 @@ public class FTPClient {
 
         byte[] buffer = new byte[4096];
         int bytesRead = 0;
-        int already = size;
+        long already = size;
         while ((bytesRead = randomAccessFile.read(buffer))!=-1){
             outputStream.write(buffer,0,bytesRead);
             already += bytesRead;
@@ -292,9 +283,6 @@ public class FTPClient {
      * @param lock
      * @return
      */
-
-
-
     public double getProgress(Object lock){
         double i = 0;
         synchronized (lock) {
@@ -303,4 +291,44 @@ public class FTPClient {
         return i;
 
     }
+
+    /**
+     * 获得文件大小
+     * @param filepath 文件相对根目录的路径
+     * @return 文件大小
+     * @throws Exception ftp连接错误
+     */
+    public long getSize(String filepath) throws Exception{
+        filepath = new String(filepath.getBytes(localCoding),serverCoding);
+
+        sendMsg("SIZE "+filepath);
+
+        String response = reader.readLine();
+        long length = Integer.parseInt(response.substring(4,response.length()));
+        System.out.println(filepath+": "+length);
+
+        return length;
+    }
+
+    /**
+     * 获得文件夹大小
+     * @param path 文件夹路径
+     * @return 文件夹大小
+     * @throws Exception ftp连接错误
+     */
+    public long getDirSize(String path) throws Exception{
+        HashMap<String,String> contents = list(path);
+        long length = 0;
+        Iterator it = contents.entrySet().iterator();
+        while (it.hasNext()){
+            Map.Entry entry = (Map.Entry) it.next();
+            if(entry.getValue().toString().equals("FILE")){
+                long l = getSize(entry.getKey().toString());
+                length += l;
+            }
+
+        }
+        return length;
+    }
+
 }
