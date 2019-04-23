@@ -25,7 +25,7 @@ public class Main {
             String password = "123456";
             try {
                 client.connect(host, port, username, password);
-                client2.connect(host, port, username, password);
+//                client2.connect(host, port, username, password);
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -49,7 +49,7 @@ public class Main {
             try{
 //            client.upload("C:\\Users\\Pan\\Desktop\\hello.txt","test\\hello.txt");
 //            client.list("/");
-//                client.download(localpath,serverpath,c);
+                client.download(localpath,serverpath,c);
             }catch (Exception e){
                 e.printStackTrace();
             }finally {
@@ -62,13 +62,15 @@ public class Main {
         thread.start();
         try{
             thread.join();
-            HashMap hashMap = client.list("/test");
+            HashMap hashMap = client.list("/test/1/新建文件夹");
+            System.out.println(client.getDirSize("/test"));
+            System.out.println("LIST: "+hashMap.toString());
         }catch (Exception e){
             e.printStackTrace();
         }
         String path = "";
         try {
-            path = new String("test\\1\\新建文件夹\\1.txt");
+            path = new String("test\\2.txt");
         }catch (Exception e){
             e.printStackTrace();
         }
