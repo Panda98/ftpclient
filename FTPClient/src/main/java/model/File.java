@@ -7,11 +7,6 @@ import java.beans.PropertyChangeSupport;
  * @author yiner
  * @since 2019-04-22
  */
-
-enum State {
-    IDLE, WORKING, STOPPING
-}
-
 public class File {
     private String name;
     private String type;
