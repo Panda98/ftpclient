@@ -82,14 +82,6 @@ public class FTPClient {
 
         String response;
 
-//        if(!parentPath.equals("/")){
-//            sendMsg("CWD "+parentPath);
-//
-//            if(!(response = reader.readLine()).startsWith("250 "))
-//                throw new Exception("没有该文件夹");
-//            System.out.println(response);
-//        }
-//        sendMsg("LIST");
         sendMsg("NLST "+path);
         response = reader.readLine();
         System.out.println(response);
@@ -243,13 +235,14 @@ public class FTPClient {
 
         calDataHostPort();
 
-        sendMsg("SIZE "+serverpath);
-
         long size= getSize(serverpath);
+
 
         sendMsg("APPE "+serverpath);
         String response = reader.readLine();
         System.out.println(response);
+
+
 
         dataSocket = new Socket(dataHost,dataPort);
 
@@ -273,8 +266,6 @@ public class FTPClient {
 
         }
         randomAccessFile.close();
-//        outputStream.close();
-//        inputStream.close();
         dataSocket.close();
     }
 
@@ -304,7 +295,9 @@ public class FTPClient {
         sendMsg("SIZE "+filepath);
 
         String response = reader.readLine();
-        long length = Integer.parseInt(response.substring(4,response.length()));
+        long length = 0;
+        if(!response.startsWith("550"))
+            length = Integer.parseInt(response.substring(4,response.length()));
         System.out.println(filepath+": "+length);
 
         return length;
