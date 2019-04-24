@@ -56,6 +56,8 @@ public class MainClient extends JFrame {
     private String uploadPath;
     private Timer timer;
 
+    private long currentDownloadthread;
+
     public String getDownloadPath() {
         return downloadPath;
     }
@@ -340,6 +342,27 @@ public class MainClient extends JFrame {
             }
         });
     }
+
+    /**
+     * 通过线程组获得线程
+     *
+     * @param threadId thread id
+     * @return thread
+     */
+    public static Thread findThread(long threadId) {
+        ThreadGroup group = Thread.currentThread().getThreadGroup();
+        while(group != null) {
+            Thread[] threads = new Thread[(int)(group.activeCount() * 1.2)];
+            int count = group.enumerate(threads, true);
+            for(int i = 0; i < count; i++) {
+                if(threadId == threads[i].getId()) {
+                    return threads[i];
+                }
+            }
+            group = group.getParent();
+        }
+        return null;
+    }
     // Util methods - End
 
 
@@ -557,6 +580,7 @@ public class MainClient extends JFrame {
             threadPool.execute(new Runnable() {
                 @Override
                 public void run() {
+                    currentDownloadthread = Thread.currentThread().getId();
                     file.setState(State.WORKING);
                     String msg = performDownload(localPath, severPath, file);
                     file.setState(State.IDLE);
@@ -593,6 +617,25 @@ public class MainClient extends JFrame {
             timer.start();
         }
 
+    }
+
+    public void stopDownload() {
+        int row = downloadTable.getSelectedRow();
+        File file = downloadFiles.get(row);
+        Thread thread = findThread(currentDownloadthread);
+        if (thread != null) {
+            try {
+                thread.stop();
+            } catch (ThreadDeath e) {
+                System.out.println("进入异常catch");
+                e.printStackTrace();
+            }
+            file.setState(State.STOPPING);
+            timer.stop();
+            downloadTable.setValueAt(null, row, 2);
+            downloadTable.getColumnModel().getColumn(2).setCellRenderer(null);
+            downloadTable.updateUI();
+        }
     }
     // UI methods - End
 
