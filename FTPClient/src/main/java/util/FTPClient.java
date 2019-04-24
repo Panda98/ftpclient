@@ -133,14 +133,14 @@ public class FTPClient {
 
 
     }
-    private void calDataHostPort(){
+    private void calDataHostPort()throws Exception{
         sendMsg("PASV");
 
         try{
             String response = reader.readLine();
             System.out.println(response);
             if (!response.startsWith("227 ")) {
-                System.out.println("error");
+                throw new Exception("无法设置被动模式！");
             }
             int opening = response.indexOf('(');
             int closing = response.indexOf(')', opening + 1);
@@ -172,8 +172,8 @@ public class FTPClient {
 
         localpath = new String(localpath.getBytes(localCoding),serverCoding);
         serverpath = new String(serverpath.getBytes(localCoding),serverCoding);
-        calDataHostPort();
 
+        calDataHostPort();
         long length = getSize(serverpath);
         System.out.println("文件总长："+length);
 
@@ -195,18 +195,10 @@ public class FTPClient {
         response = reader.readLine();
         System.out.println(response);
 
-
-
-
         dataSocket = new Socket(dataHost, dataPort);
         BufferedInputStream inputStream = new BufferedInputStream(dataSocket.getInputStream());
-
-
-
         byte[] buffer = new byte[4096];
         int bytesRead = 0;
-
-
         int already = startIndex;
         while ((bytesRead = inputStream.read(buffer))!=-1){
             randomAccessFile.write(buffer,0,bytesRead);
@@ -236,13 +228,9 @@ public class FTPClient {
         calDataHostPort();
 
         long size= getSize(serverpath);
-
-
         sendMsg("APPE "+serverpath);
         String response = reader.readLine();
         System.out.println(response);
-
-
 
         dataSocket = new Socket(dataHost,dataPort);
 
@@ -318,9 +306,13 @@ public class FTPClient {
             if(entry.getValue().toString().equals("FILE")){
                 long l = getSize(entry.getKey().toString());
                 length += l;
+            }else{
+                long l = getDirSize(entry.getKey().toString());
+                length += l;
             }
 
         }
+        System.out.println("("+path+")大小："+length);
         return length;
     }
 
