@@ -70,7 +70,9 @@ public class Main {
         client = new FTPClient();
         try{
             client.connect(host,port,username,password);
-            client.upload("C:\\Users\\Pan\\Desktop\\chapter3.pdf","chapter3.pdf",c);
+//            client.upload("C:\\Users\\Pan\\Desktop\\chapter3.pdf","chapter3.pdf",c);
+            long l = client.getDirSize("/");
+
         }catch (Exception e){
             e.printStackTrace();
         }
