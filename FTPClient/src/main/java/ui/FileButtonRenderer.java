@@ -3,11 +3,9 @@ package ui;
 import model.State;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+
 
 /**
  * @author yiner
@@ -29,10 +27,17 @@ public class FileButtonRenderer extends JButton implements TableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                                    boolean hasFocus, int row, int column) {
+
+        if (value == null) return null;
+
+        if (table.getName().equals("uploadTable")) {
+            setIcon(null);
+            //State state = (State)value;
+            if (value == null || value.equals("IDLE")) setEnabled(false);
+        }
         setSize(40, 40);
         setBackground(Color.white);
         setBorder(null);
-        //setText((value == null) ? "" : value.toString());
         return this;
     }
 

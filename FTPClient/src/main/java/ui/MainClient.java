@@ -29,6 +29,7 @@ import javax.swing.plaf.*;
 import javax.swing.table.*;
 import com.intellij.uiDesigner.core.*;
 import model.File;
+import model.State;
 import org.jdesktop.beansbinding.*;
 import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
 import util.FTPClient;
@@ -46,13 +47,37 @@ public class MainClient extends JFrame {
     }
 
     private static final String[] columns={"","","",""};//所有的列字段
+
+    // property - Begin
     private List<model.File> downloadFiles;
     private List<model.File> uploadFiles;
+    private String downloadPath;
+    private String uploadPath;
+
+    public String getDownloadPath() {
+        return downloadPath;
+    }
+
+    public String getUploadPath() {
+        return uploadPath;
+    }
+
+    public void setDownloadPath(String downloadPath) {
+        String oldPath = this.downloadPath;
+        this.downloadPath = downloadPath;
+        changeSupport.firePropertyChange("downloadPath", oldPath, downloadPath);
+    }
+
+    public void setUploadPath(String uploadPath) {
+        String oldPath = this.uploadPath;
+        this.uploadPath = uploadPath;
+        changeSupport.firePropertyChange("uploadPath", oldPath, uploadPath);
+    }
+    // property - End
+
 
     // Java bean for binding
     private String status;
-    private String downloadPath;
-    private String uploadPath;
 
     public String getStatus() {
         return status;
@@ -63,27 +88,6 @@ public class MainClient extends JFrame {
         this.status = status;
         changeSupport.firePropertyChange("status", oldValue, status);
     }
-
-    public String getDownloadPath() {
-        return downloadPath;
-    }
-
-    public void setDownloadPath(String downloadPath) {
-        String oldPath = this.downloadPath;
-        this.downloadPath = downloadPath;
-        changeSupport.firePropertyChange("downloadPath", oldPath, downloadPath);
-    }
-
-    public String getUploadPath() {
-        return uploadPath;
-    }
-
-    public void setUploadPath(String uploadPath) {
-        String oldPath = this.uploadPath;
-        this.uploadPath = uploadPath;
-        changeSupport.firePropertyChange("uploadPath", oldPath, uploadPath);
-    }
-
 
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
@@ -96,19 +100,22 @@ public class MainClient extends JFrame {
     }
     // Java bean - End
 
+
     public MainClient() {
         downloadFiles = new ArrayList<>();
         uploadFiles = new ArrayList<>();
-        initComponents();
-        tabbedPane1.setUI(new FlatTabbedPanedUI());
-        setStatus("未连接");
 
+        initComponents();
+
+        tabbedPane1.setUI(new FlatTabbedPanedUI());
+        downloadTable.setName("downloadTable");
+        uploadTable.setName("uploadTable");
+        setStatus("未连接");
+        // 添加拖拽目标和监听器
         DropTargetListener handler = new DragHandler(this);
         DropTarget dropTarget = new DropTarget(addFilesLabel,DnDConstants.ACTION_MOVE,
                 handler, true, null );
     }
-
-
 
 
     // Util methods
@@ -127,14 +134,19 @@ public class MainClient extends JFrame {
         return msg;
     }
 
-    private String performDownload(String path) {
+    private String performDownload(String localPath, String serverPath) {
         String msg;
         char[] lock = new char[0];
-        int index = path.lastIndexOf("/");
-        String name = path.substring(index);
-        String serverPath = uploadPath + name;
+        int index;
+        index = serverPath.lastIndexOf("/");
+        String name = serverPath.substring(index+1);
+        if (localPath.contains("/")) {
+            localPath = localPath + "/" + name;  // mac
+        } else {
+            localPath = localPath + "\\" + name;  // window
+        }
         try {
-            client.download(path, downloadPath, lock);
+            client.download(localPath, serverPath, lock);
             msg = "下载成功！";
         } catch (Exception e) {
             msg = e.getMessage();
@@ -145,9 +157,12 @@ public class MainClient extends JFrame {
     private String performUpload(String path) {
         String msg;
         char[] lock = new char[0];
-        int index = path.lastIndexOf("/");
-        String name = path.substring(index);
-        String serverPath = uploadPath + name;
+        int index;
+        if ((index = path.lastIndexOf("/"))== -1){  // mac's path with "/"
+            index = path.lastIndexOf("\\");   // window's path with "\"
+        }
+        String name = path.substring(index+1);
+        String serverPath = uploadPath + "/" + name;
         try {
             client.upload(path, serverPath, lock);
             msg = "上传成功！";
@@ -157,14 +172,13 @@ public class MainClient extends JFrame {
         return msg;
     }
 
-
     private void refreshMainFrame() {
         threadPool.execute(new Runnable() {
             public void run() {
-                listFile("/", downloadTable, downloadFiles);
                 setDownloadPath("/");
-                listFile("/", uploadTable, uploadFiles);
+                listFile("/", downloadTable, downloadFiles);
                 setUploadPath("/");
+                listFile("/", uploadTable, uploadFiles);
             }
         });
 
@@ -181,13 +195,48 @@ public class MainClient extends JFrame {
         }
     }
 
-    private void createDataModel(LinkedHashMap<String,String> fileList,
-                                 JTable table, List<model.File> files){
+    private String getDirSize(String path) {
+        double byteSize = 0;
+        try {
+            byteSize = client.getDirSize(path);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        if (byteSize > 1024*1024) {
+            return String.format("%.2f MB", byteSize / 1024 / 1024);
+        } else if (byteSize > 1024) {
+            return String.format("%.2f KB", byteSize / 1024);
+        }
+
+        return String.format("%.2f Byte", byteSize);
+    }
+
+    private String getFileSize(String path) {
+        double byteSize = 0;
+        try {
+            byteSize = client.getSize(path);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        if (byteSize > 1024*1024) {
+            return String.format("%.2f MB", byteSize / 1024 / 1024);
+        } else if (byteSize > 1024) {
+            return String.format("%.2f KB", byteSize / 1024);
+        }
+
+        return String.format("%.2f Byte", byteSize);
+    }
+
+    private void createDataModel(LinkedHashMap<String,String> fileList, JTable table, List<model.File> files){
         Iterator<Map.Entry<String, String>> iterator = fileList.entrySet().iterator();
         files.clear();
+        int count = 0;
         while (iterator.hasNext()) {
             Map.Entry<String, String> entry = iterator.next();
             files.add(new File(entry.getKey(), entry.getValue()));
+            if (entry.getValue().equals("FILE")) count++;
         }
         int len = files.size();
         Object[][] dataObjects = new Object[len][4];
@@ -201,10 +250,20 @@ public class MainClient extends JFrame {
 
         table.getColumnModel().getColumn(3).setCellRenderer(new FileButtonRenderer());
         table.getColumnModel().getColumn(3).setCellEditor(new FileButtonCellEditor(this));
+
+        if (table.getName().equals("downloadTable")) {
+            //table.getColumnModel().getColumn(3).setCellRenderer(new FileButtonRenderer());
+            //table.getColumnModel().getColumn(3).setCellEditor(new FileButtonCellEditor(this));
+            fileNumber1.setText(String.valueOf(count));
+            fileSize1.setText(getDirSize(downloadPath));  // set path before updating data model
+        } else {
+            fileNumber2.setText(String.valueOf(count));
+            fileSize2.setText(getDirSize(uploadPath));  // set path before updating data model
+        }
+
         table.getTableHeader().setVisible(false);
+        table.updateUI();
     }
-
-
 
     private void clearDataModel(JTable table, List<model.File> files) {
         files.clear();
@@ -221,11 +280,20 @@ public class MainClient extends JFrame {
             @Override
             public void setValueAt(Object value, int row, int column){
                 dataObjects[row][column]= value;
+                if (column == 3) {
+                    if (table.getName().equals("downloadTable")) {
+                        File file = downloadFiles.get(row);
+                        file.setState((State) value);
+                    } else {
+                        File file = uploadFiles.get(row);
+                        file.setState((State) value);
+                    }
+                }
             }
         });
     }
-
     // Util methods - End
+
 
     // UI methods
     private void buttonConnActionPerformed(ActionEvent e) {
@@ -307,11 +375,10 @@ public class MainClient extends JFrame {
                 JOptionPane.showMessageDialog(null, "断开连接成功！",
                         "提示", JOptionPane.OK_OPTION, null);
 
-                clearDataModel(downloadTable, downloadFiles);
-                clearDataModel(uploadTable, uploadFiles);
                 setDownloadPath("");
                 setUploadPath("");
-
+                clearDataModel(downloadTable, downloadFiles);
+                clearDataModel(uploadTable, uploadFiles);
                 setStatus("未连接");
             }
         });
@@ -322,37 +389,15 @@ public class MainClient extends JFrame {
         String filepath = downloadFiles.get(row).getPath();
         String type = downloadFiles.get(row).getType();
         if(type.equals("DIR")){
+            setDownloadPath(filepath);
             threadPool.execute(new Runnable() {
                 public void run() {
                     listFile(filepath, downloadTable, downloadFiles);
                 }
             });
-            setDownloadPath(filepath);
+        } else { // file
+            fileSize1.setText(getFileSize(filepath));
         }
-    }
-
-    private void buttonBack1MouseClicked(MouseEvent e) {
-        String currPath = path1.getText();
-        int index = currPath.lastIndexOf("/");
-        String parentPath = index == 0?"/":currPath.substring(0,index);
-        threadPool.execute(new Runnable() {
-            public void run() {
-                listFile(parentPath, downloadTable, downloadFiles);
-            }
-        });
-        setDownloadPath(parentPath);
-    }
-
-    private void buttonBack2MouseClicked(MouseEvent e) {
-        String currPath = path2.getText();
-        int index = currPath.lastIndexOf("/");
-        String parentPath = index == 0?"/":currPath.substring(0,index);
-        threadPool.execute(new Runnable() {
-            public void run() {
-                listFile(parentPath, uploadTable, uploadFiles);
-            }
-        });
-        setUploadPath(parentPath);
     }
 
     private void uploadTableMouseClicked(MouseEvent e) {
@@ -360,13 +405,39 @@ public class MainClient extends JFrame {
         String filepath = uploadFiles.get(row).getPath();
         String type = uploadFiles.get(row).getType();
         if(type.equals("DIR")){
+            setUploadPath(filepath);
             threadPool.execute(new Runnable() {
                 public void run() {
                     listFile(filepath, uploadTable, uploadFiles);
                 }
             });
-            setUploadPath(filepath);
+        } else { // file
+            fileSize2.setText(getFileSize(filepath));
         }
+    }
+
+    private void buttonBack1MouseClicked(MouseEvent e) {
+        String currPath = path1.getText();
+        int index = currPath.lastIndexOf("/");
+        String parentPath = index == 0?"/":currPath.substring(0,index);
+        setDownloadPath(parentPath);
+        threadPool.execute(new Runnable() {
+            public void run() {
+                listFile(parentPath, downloadTable, downloadFiles);
+            }
+        });
+    }
+
+    private void buttonBack2MouseClicked(MouseEvent e) {
+        String currPath = path2.getText();
+        int index = currPath.lastIndexOf("/");
+        String parentPath = index == 0?"/":currPath.substring(0,index);
+        setUploadPath(parentPath);
+        threadPool.execute(new Runnable() {
+            public void run() {
+                listFile(parentPath, uploadTable, uploadFiles);
+            }
+        });
     }
 
     private void addFilesMouseClicked(MouseEvent e) {
@@ -416,25 +487,25 @@ public class MainClient extends JFrame {
 
     public void downloadClicked() {
         int row = downloadTable.getSelectedRow();
-        String fileName = downloadFiles.get(row).getPath();
+        String severPath = downloadFiles.get(row).getPath();
 
         int result;
-        final String path;
+        final String localPath;
         JFileChooser fileChooser = new JFileChooser();
         FileSystemView fsv = FileSystemView.getFileSystemView();  //注意了，这里重要的一句
         System.out.println(fsv.getHomeDirectory());                //得到桌面路径
         fileChooser.setCurrentDirectory(fsv.getHomeDirectory());
-        fileChooser.setDialogTitle("请选择要上传的文件...");
+        fileChooser.setDialogTitle("请选择存放的文件夹...");
         fileChooser.setApproveButtonText("确定");
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         result = fileChooser.showOpenDialog(null);
         if (JFileChooser.APPROVE_OPTION == result) {
-            path=fileChooser.getSelectedFile().getPath();
-            System.out.println("path: "+path);
+            localPath=fileChooser.getSelectedFile().getPath();
+            System.out.println("path: "+localPath);
             threadPool.execute(new Runnable() {
                 @Override
                 public void run() {
-                    String msg = performDownload(path);
+                    String msg = performDownload(localPath, severPath);
                     JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
                 }
             });
@@ -442,6 +513,7 @@ public class MainClient extends JFrame {
 
     }
     // UI methods - End
+
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
@@ -642,7 +714,7 @@ public class MainClient extends JFrame {
                         //---- fileSize1 ----
                         fileSize1.setForeground(new Color(152, 181, 205));
                         fileSize1.setOpaque(false);
-                        fileSize1.setText("5MB");
+                        fileSize1.setText("0 MB");
                         fileSize1.setHorizontalAlignment(SwingConstants.CENTER);
                         infoBar1.add(fileSize1, new GridConstraints(0, 2, 1, 1,
                             GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_NONE,
@@ -753,7 +825,7 @@ public class MainClient extends JFrame {
                         //---- fileSize2 ----
                         fileSize2.setForeground(new Color(152, 181, 205));
                         fileSize2.setOpaque(false);
-                        fileSize2.setText("5MB");
+                        fileSize2.setText("0 MB");
                         fileSize2.setHorizontalAlignment(SwingConstants.CENTER);
                         infoBar2.add(fileSize2, new GridConstraints(0, 2, 1, 1,
                             GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_NONE,

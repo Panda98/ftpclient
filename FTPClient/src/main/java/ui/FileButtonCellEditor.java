@@ -79,11 +79,22 @@ public class FileButtonCellEditor extends JButton implements TableCellEditor{
     }
 
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+
+        if (value == null) return null;
+
         setSize(40, 40);
         setBackground(Color.white);
         setBorder(null);
-        this.row = row;
+        setBorderPainted(false); // 选中时不显示边框
+        //this.row = row;
         setState((State)value);
+
+        if (table.getName().equals("uploadTable")) {
+            setIcon(null);
+            //State state = (State)value;
+            if (value == null || value.equals("IDLE")) setEnabled(false);
+        }
+
         return this;
     }
 

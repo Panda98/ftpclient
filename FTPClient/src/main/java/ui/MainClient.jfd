@@ -137,7 +137,7 @@ new FormModel {
 								name: "fileSize1"
 								"foreground": &Color6 new java.awt.Color( 152, 181, 205, 255 )
 								"opaque": false
-								"text": "5MB"
+								"text": "0 MB"
 								"horizontalAlignment": 0
 							}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 								"column": 2
@@ -251,7 +251,7 @@ new FormModel {
 								name: "fileSize2"
 								"foreground": #Color6
 								"opaque": false
-								"text": "5MB"
+								"text": "0 MB"
 								"horizontalAlignment": 0
 							}, new FormLayoutConstraints( class com.intellij.uiDesigner.core.GridConstraints ) {
 								"column": 2

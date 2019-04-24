@@ -9,9 +9,28 @@ import java.beans.PropertyChangeSupport;
  */
 public class File {
     private String name;
+    private String path;
     private String type;
     private Double progress;
     private State state;
+    private Object lock;
+
+    public File (String path, String type) {
+        this.path = path;
+        this.name = pareseName(path);
+        this.type = type;
+        if (type.equals("FILE")) {
+            this.state = State.IDLE;
+        }
+    }
+
+    public Object getLock() {
+        return lock;
+    }
+
+    public void setLock(Object lock) {
+        this.lock = lock;
+    }
 
     public String getPath() {
         return path;
@@ -22,16 +41,6 @@ public class File {
         this.path = path;
         setName(pareseName(path));
         changeSupport.firePropertyChange("path", oldPath, path);
-    }
-
-    private String path;
-
-    public File (String path, String type) {
-        this.path = path;
-        this.name = pareseName(path);
-        this.type = type;
-        this.progress = 0.0;
-        this.state = State.IDLE;
     }
 
     /**
