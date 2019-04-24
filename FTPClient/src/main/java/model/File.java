@@ -11,7 +11,7 @@ public class File {
     private String name;
     private String path;
     private String type;
-    private Double progress;
+    private Integer progress;
     private State state;
     private Object lock;
 
@@ -74,12 +74,12 @@ public class File {
         changeSupport.firePropertyChange("type", oldType, type);
     }
 
-    public Double getProgress() {
+    public Integer getProgress() {
         return progress;
     }
 
-    public void setProgress(Double progress) {
-        Double oldProgress = this.progress;
+    public void setProgress(Integer progress) {
+        Integer oldProgress = this.progress;
         this.progress = progress;
         changeSupport.firePropertyChange("progress", oldProgress, progress);
     }

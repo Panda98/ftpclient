@@ -28,12 +28,13 @@ public class FileButtonRenderer extends JButton implements TableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                                    boolean hasFocus, int row, int column) {
 
-        if (value == null) return null;
+        Object o = table.getValueAt(row, column);
+        if (o == null) return null;
 
         if (table.getName().equals("uploadTable")) {
             setIcon(null);
             //State state = (State)value;
-            if (value == null || value.equals("IDLE")) setEnabled(false);
+            if ( value.equals("IDLE")) setEnabled(false);
         }
         setSize(40, 40);
         setBackground(Color.white);

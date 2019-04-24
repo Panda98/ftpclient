@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.border.*;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.plaf.*;
@@ -53,6 +54,7 @@ public class MainClient extends JFrame {
     private List<model.File> uploadFiles;
     private String downloadPath;
     private String uploadPath;
+    private Timer timer;
 
     public String getDownloadPath() {
         return downloadPath;
@@ -115,6 +117,9 @@ public class MainClient extends JFrame {
         DropTargetListener handler = new DragHandler(this);
         DropTarget dropTarget = new DropTarget(addFilesLabel,DnDConstants.ACTION_MOVE,
                 handler, true, null );
+
+
+
     }
 
 
@@ -134,9 +139,13 @@ public class MainClient extends JFrame {
         return msg;
     }
 
-    private String performDownload(String localPath, String serverPath) {
+    private String performDownload(String localPath, String serverPath, File file) {
         String msg;
-        char[] lock = new char[0];
+        char[] lock;
+        if ((lock = (char [])file.getLock()) == null) {
+            lock = new char[0];
+            file.setLock(lock);
+        }
         int index;
         index = serverPath.lastIndexOf("/");
         String name = serverPath.substring(index+1);
@@ -163,6 +172,21 @@ public class MainClient extends JFrame {
         }
         String name = path.substring(index+1);
         String serverPath = uploadPath + "/" + name;
+        boolean exist = false;
+        File file = null;
+        for (File f : uploadFiles) {
+            if (f.getPath().equals(serverPath)) {
+                file = f;
+                exist = true;
+            }
+        }
+        if (!exist) {
+            file = new File(serverPath, "FILE");
+            uploadFiles.add(file);
+        }
+        file.setState(State.WORKING);
+        file.setLock(lock);
+
         try {
             client.upload(path, serverPath, lock);
             msg = "上传成功！";
@@ -229,6 +253,14 @@ public class MainClient extends JFrame {
         return String.format("%.2f Byte", byteSize);
     }
 
+    private double getProgress(File file) {
+        Object lock;
+        if ((lock = file.getLock())!=null) {
+            return client.getProgress(lock) * 100;
+        }
+        return -1;
+    }
+
     private void createDataModel(LinkedHashMap<String,String> fileList, JTable table, List<model.File> files){
         Iterator<Map.Entry<String, String>> iterator = fileList.entrySet().iterator();
         files.clear();
@@ -252,8 +284,6 @@ public class MainClient extends JFrame {
         table.getColumnModel().getColumn(3).setCellEditor(new FileButtonCellEditor(this));
 
         if (table.getName().equals("downloadTable")) {
-            //table.getColumnModel().getColumn(3).setCellRenderer(new FileButtonRenderer());
-            //table.getColumnModel().getColumn(3).setCellEditor(new FileButtonCellEditor(this));
             fileNumber1.setText(String.valueOf(count));
             fileSize1.setText(getDirSize(downloadPath));  // set path before updating data model
         } else {
@@ -275,7 +305,7 @@ public class MainClient extends JFrame {
         table.setModel(new DefaultTableModel(dataObjects, columns){
             @Override
             public boolean isCellEditable(int row,int column){
-                return column == 3;
+                return column > 1;
             }
             @Override
             public void setValueAt(Object value, int row, int column){
@@ -289,6 +319,22 @@ public class MainClient extends JFrame {
                         file.setState((State) value);
                     }
                 }
+                if (column == 2) {
+                    if (table.getName().equals("downloadTable")) {
+                        File file = downloadFiles.get(row);
+                        if (value == null) file.setProgress(null);
+                        else file.setProgress((Integer) value);
+                    } else {
+                        File file = uploadFiles.get(row);
+                        if (value == null) file.setProgress(null);
+                        else file.setProgress((Integer) value);
+                    }
+                }
+            }
+
+            @Override
+            public Object getValueAt(int row, int column) {
+                return dataObjects[row][column];
             }
         });
     }
@@ -360,6 +406,7 @@ public class MainClient extends JFrame {
 
         frame.pack();
         frame.setVisible(true);
+
     }
 
     private void disconnectActionPerformed(ActionEvent e) {
@@ -487,7 +534,10 @@ public class MainClient extends JFrame {
 
     public void downloadClicked() {
         int row = downloadTable.getSelectedRow();
-        String severPath = downloadFiles.get(row).getPath();
+        File file = downloadFiles.get(row);
+        String severPath = file.getPath();
+
+        if (file.getType().equals("DIR")) return;
 
         int result;
         final String localPath;
@@ -505,10 +555,68 @@ public class MainClient extends JFrame {
             threadPool.execute(new Runnable() {
                 @Override
                 public void run() {
-                    String msg = performDownload(localPath, severPath);
+                    file.setState(State.WORKING);
+                    String msg = performDownload(localPath, severPath, file);
+                    file.setState(State.IDLE);
                     JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
                 }
             });
+
+            downloadTable.setValueAt(new Integer(0), row, 2);
+            FileProgressRenderer progressBar = new FileProgressRenderer();
+            FileProgressCellEditor fileProgressCellEditor = new FileProgressCellEditor();
+            downloadTable.getColumnModel().getColumn(2).setCellRenderer(progressBar);
+            downloadTable.getColumnModel().getColumn(2).setCellEditor(fileProgressCellEditor);
+
+            downloadTable.updateUI();
+
+//            timer = new Timer(500, new ActionListener() {
+//                @Override
+//                public void actionPerformed(ActionEvent e) {
+//                    double value;
+//                    value = getProgress(file);
+//                    int num = value < 0 ? -1 : (int)value;
+//
+//                    progressBar.updateValue(num);
+//                    progressBar.updateUI();
+//
+////                    if (SwingUtilities.isEventDispatchThread()) {
+////                        progressBar.updateValue(num);
+////                        progressBar.updateUI();
+////                    }
+////                    else {
+////                        SwingUtilities.invokeLater(new Runnable() {
+////                            @Override
+////                            public void run() {
+////                                progressBar.updateValue(num);
+////                                progressBar.updateUI();
+////                            }
+////                        });
+////                    }
+//
+//                    //Timer timer = (Timer) e.getSource();
+//                    if (file.getState() == State.IDLE || progressBar.getValue() >= 100)
+//                    {
+//                        timer.stop();
+//                        downloadTable.setValueAt(null, row, 2);
+//                        downloadTable.getColumnModel().getColumn(2).setCellRenderer(null);
+//                        downloadTable.updateUI();
+//                    }
+//                }
+//
+//            });
+//            timer.start();
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    fileProgressCellEditor.setValue(50);
+                }
+            });
+            fileProgressCellEditor.updateValue(50);
+            fileProgressCellEditor.updateUI();
+            downloadTable.updateUI();
+
+
         }
 
     }
@@ -562,6 +670,7 @@ public class MainClient extends JFrame {
         popupMenu1 = new JPopupMenu();
         connect = new JMenuItem();
         disconnect = new JMenuItem();
+        progressBar1 = new JProgressBar();
 
         //======== this ========
         Container contentPane = getContentPane();
@@ -1086,6 +1195,13 @@ public class MainClient extends JFrame {
             popupMenu1.add(disconnect);
         }
 
+        //---- progressBar1 ----
+        progressBar1.setBackground(new Color(152, 181, 205));
+        progressBar1.setValue(20);
+        progressBar1.setMinimumSize(new Dimension(10, 10));
+        progressBar1.setPreferredSize(new Dimension(100, 7));
+        progressBar1.setForeground(new Color(64, 73, 105));
+
         //---- bindings ----
         bindingGroup = new BindingGroup();
         bindingGroup.addBinding(Bindings.createAutoBinding(UpdateStrategy.READ_WRITE,
@@ -1150,6 +1266,7 @@ public class MainClient extends JFrame {
     private JPopupMenu popupMenu1;
     private JMenuItem connect;
     private JMenuItem disconnect;
+    private JProgressBar progressBar1;
     private BindingGroup bindingGroup;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
