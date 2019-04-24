@@ -1,5 +1,7 @@
 package util;
 
+import com.jformdesigner.S;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
@@ -8,6 +10,10 @@ import java.util.*;
  * Created by Pan on 2019/4/17.
  */
 public class FTPClient {
+    private String host;
+    private int port;
+    private String username;
+    private String password;
     private Socket socket;
     private BufferedReader reader;
     private PrintWriter writer;
@@ -33,8 +39,6 @@ public class FTPClient {
      * @throws Exception 连接失败
      */
     public void connect(String host,int port,String username,String password) throws Exception{
-        if(socket!= null)
-            throw new Exception("连接已经建立！");
 
         socket = new Socket(host,port);
         reader =new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -60,6 +64,11 @@ public class FTPClient {
         }
 
         System.out.println("connect succeed. ");
+
+        this.host = host;
+        this.port = port;
+        this.username = username;
+        this.password = password;
 
 
 
@@ -127,6 +136,10 @@ public class FTPClient {
                 outputStream.close();
                 outputStream = null;
             }
+            if(dataSocket != null){
+                dataSocket.close();
+                dataSocket = null;
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -167,8 +180,9 @@ public class FTPClient {
      * @throws Exception 读写错误
      */
     public void download(String localpath,String serverpath,Object lock) throws Exception{
-        if(socket == null)
+        if(host == null)
             throw new Exception("连接未建立！");
+        connect(host,port,username,password);
 
         localpath = new String(localpath.getBytes(localCoding),serverCoding);
         serverpath = new String(serverpath.getBytes(localCoding),serverCoding);
@@ -181,6 +195,8 @@ public class FTPClient {
         int startIndex = 0;
         if(file.exists())
             startIndex = (int) file.length();
+        if(startIndex == length)
+            throw new Exception("文件已存在！");
 
         RandomAccessFile randomAccessFile = new RandomAccessFile(file,"rw");
         randomAccessFile.seek(startIndex);
@@ -210,6 +226,10 @@ public class FTPClient {
         randomAccessFile.close();
         inputStream.close();
         dataSocket.close();
+        response = reader.readLine();
+        if(!response.startsWith("226 "))
+            throw new Exception("传输失败！");
+
     }
 
     /**
@@ -219,8 +239,9 @@ public class FTPClient {
      * @throws Exception 读写错误
      */
     public void upload(String localpath,String serverpath,Object lock) throws Exception{
-        if(socket == null)
+        if(host == null)
             throw new Exception("连接未建立！");
+        connect(host,port,username,password);
 
         localpath = new String(localpath.getBytes(localCoding),serverCoding);
         serverpath = new String(serverpath.getBytes(localCoding),serverCoding);
@@ -255,6 +276,10 @@ public class FTPClient {
         }
         randomAccessFile.close();
         dataSocket.close();
+
+        response = reader.readLine();
+        if(!response.startsWith("226 "))
+            throw new Exception("传输失败！");
     }
 
     /**
