@@ -309,7 +309,8 @@ public class MainClient extends JFrame {
             }
             @Override
             public void setValueAt(Object value, int row, int column){
-                dataObjects[row][column]= value;
+                //dataObjects[row][column]= value;
+                super.setValueAt(value,row,column);
                 if (column == 3) {
                     if (table.getName().equals("downloadTable")) {
                         File file = downloadFiles.get(row);
@@ -334,7 +335,8 @@ public class MainClient extends JFrame {
 
             @Override
             public Object getValueAt(int row, int column) {
-                return dataObjects[row][column];
+                //return dataObjects[row][column];
+                return super.getValueAt(row,column);
             }
         });
     }
@@ -567,56 +569,28 @@ public class MainClient extends JFrame {
             FileProgressCellEditor fileProgressCellEditor = new FileProgressCellEditor();
             downloadTable.getColumnModel().getColumn(2).setCellRenderer(progressBar);
             downloadTable.getColumnModel().getColumn(2).setCellEditor(fileProgressCellEditor);
-
             downloadTable.updateUI();
 
-//            timer = new Timer(500, new ActionListener() {
-//                @Override
-//                public void actionPerformed(ActionEvent e) {
-//                    double value;
-//                    value = getProgress(file);
-//                    int num = value < 0 ? -1 : (int)value;
-//
-//                    progressBar.updateValue(num);
-//                    progressBar.updateUI();
-//
-////                    if (SwingUtilities.isEventDispatchThread()) {
-////                        progressBar.updateValue(num);
-////                        progressBar.updateUI();
-////                    }
-////                    else {
-////                        SwingUtilities.invokeLater(new Runnable() {
-////                            @Override
-////                            public void run() {
-////                                progressBar.updateValue(num);
-////                                progressBar.updateUI();
-////                            }
-////                        });
-////                    }
-//
-//                    //Timer timer = (Timer) e.getSource();
-//                    if (file.getState() == State.IDLE || progressBar.getValue() >= 100)
-//                    {
-//                        timer.stop();
-//                        downloadTable.setValueAt(null, row, 2);
-//                        downloadTable.getColumnModel().getColumn(2).setCellRenderer(null);
-//                        downloadTable.updateUI();
-//                    }
-//                }
-//
-//            });
-//            timer.start();
+            timer = new Timer(500, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    double value;
+                    value = getProgress(file);
+                    int num = value < 0 ? -1 : (int)value;
 
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    fileProgressCellEditor.setValue(50);
+                    downloadTable.setValueAt(new Integer(num), row, 2);
+
+                    if (file.getState() == State.IDLE || progressBar.getValue() >= 100)
+                    {
+                        timer.stop();
+                        downloadTable.setValueAt(null, row, 2);
+                        downloadTable.getColumnModel().getColumn(2).setCellRenderer(null);
+                        downloadTable.updateUI();
+                    }
                 }
+
             });
-            fileProgressCellEditor.updateValue(50);
-            fileProgressCellEditor.updateUI();
-            downloadTable.updateUI();
-
-
+            timer.start();
         }
 
     }
@@ -670,7 +644,6 @@ public class MainClient extends JFrame {
         popupMenu1 = new JPopupMenu();
         connect = new JMenuItem();
         disconnect = new JMenuItem();
-        progressBar1 = new JProgressBar();
 
         //======== this ========
         Container contentPane = getContentPane();
@@ -1195,13 +1168,6 @@ public class MainClient extends JFrame {
             popupMenu1.add(disconnect);
         }
 
-        //---- progressBar1 ----
-        progressBar1.setBackground(new Color(152, 181, 205));
-        progressBar1.setValue(20);
-        progressBar1.setMinimumSize(new Dimension(10, 10));
-        progressBar1.setPreferredSize(new Dimension(100, 7));
-        progressBar1.setForeground(new Color(64, 73, 105));
-
         //---- bindings ----
         bindingGroup = new BindingGroup();
         bindingGroup.addBinding(Bindings.createAutoBinding(UpdateStrategy.READ_WRITE,
@@ -1266,7 +1232,6 @@ public class MainClient extends JFrame {
     private JPopupMenu popupMenu1;
     private JMenuItem connect;
     private JMenuItem disconnect;
-    private JProgressBar progressBar1;
     private BindingGroup bindingGroup;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

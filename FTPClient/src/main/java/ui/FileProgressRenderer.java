@@ -14,37 +14,22 @@ import java.awt.*;
 public class FileProgressRenderer extends JProgressBar implements TableCellRenderer {
     public FileProgressRenderer() {
         super(JProgressBar.HORIZONTAL, 0, 100);
-        setBackground(new Color(152, 181, 205));
-        setForeground(new Color(64, 73, 105));
-        setSize(new Dimension(100, 10));
         setStringPainted(true);
-        setValue(50);
     }
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                                    boolean hasFocus, int row, int column) {
-        Object o = table.getValueAt(row, column);
-        if (o == null || !(o instanceof Integer)) return null;
+        if (value == null || !(value instanceof Integer)) return null;
 
-        setBackground(new Color(152, 181, 205));
-        setForeground(new Color(64, 73, 105));
-        setSize(new Dimension(100, 10));
-        //setStringPainted(true);
-        setValue(50);
-
-        int num = (int)o;
-        updateValue(num);
-        return this;
-    }
-
-    public void updateValue(int num){
-        if (num == -1 ){
+        if ((Integer)value == -1 ){
             setIndeterminate(true);
         } else {
             setIndeterminate(false);
-            setValue(num);
+
+            this.setValue((Integer) value);
         }
+        return this;
     }
 
     @Override

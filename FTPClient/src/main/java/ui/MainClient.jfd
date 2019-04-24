@@ -537,17 +537,6 @@ new FormModel {
 			"location": new java.awt.Point( 450, 705 )
 			"size": new java.awt.Dimension( 103, 50 )
 		} )
-		add( new FormComponent( "javax.swing.JProgressBar" ) {
-			name: "progressBar1"
-			"background": new java.awt.Color( 152, 181, 205, 255 )
-			"value": 20
-			"minimumSize": new java.awt.Dimension( 10, 10 )
-			"preferredSize": new java.awt.Dimension( 100, 7 )
-			"foreground": new java.awt.Color( 64, 73, 105, 255 )
-		}, new FormLayoutConstraints( null ) {
-			"location": new java.awt.Point( 100, 95 )
-			"size": new java.awt.Dimension( 100, 25 )
-		} )
 		addBindingGroup( new FormBindingGroup( class org.jdesktop.beansbinding.BindingGroup ) {
 			"name": "bindingGroup"
 			addBinding( new FormBinding( "this", "${status}", "status2", "text" ) )

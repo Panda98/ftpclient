@@ -3,8 +3,7 @@ package ui;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import javax.swing.JComponent;
-import javax.swing.JProgressBar;
+import javax.swing.*;
 import javax.swing.plaf.basic.BasicProgressBarUI;
 
 /**
@@ -26,9 +25,12 @@ public class ProgressUI extends BasicProgressBarUI {
 
     @Override
     protected void paintDeterminate(Graphics g, JComponent c) {
-
         this.bar.setBackground(bgColor);
         this.bar.setForeground(foreColor);
+        //未覆盖前的进度条颜色
+        UIManager.put("ProgressBar.selectionBackground",Color.WHITE);
+        //覆盖后的进度条颜色
+        UIManager.put("ProgressBar.selectionForeground",Color.WHITE);
         super.paintDeterminate(g, c);
     }
 

@@ -14,11 +14,7 @@ import java.util.EventObject;
 public class FileProgressCellEditor extends JProgressBar implements TableCellEditor {
     public FileProgressCellEditor() {
         super(JProgressBar.HORIZONTAL, 0, 100);
-        setBackground(new Color(152, 181, 205));
-        setForeground(new Color(64, 73, 105));
-        setSize(new Dimension(100, 9));
         setStringPainted(true);
-        setValue(50);
     }
 
     private Integer progress;
@@ -30,29 +26,16 @@ public class FileProgressCellEditor extends JProgressBar implements TableCellEdi
     }
 
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        Object o = table.getValueAt(row, column);
-        if (o == null || !(o instanceof Integer)) return null;
+        if (value == null || !(value instanceof Integer)) return null;
 
-        setBackground(new Color(152, 181, 205));
-        setForeground(new Color(64, 73, 105));
-        setSize(new Dimension(100, 10));
-        //setStringPainted(true);
-        setValue(50);
-
-        int num = (int)o;
-        progress = num;
-        updateValue(num);
-        return this;
-    }
-
-    public void updateValue(int num){
-        if (num == -1 ){
+        if ((Integer)value == -1 ){
             setIndeterminate(true);
         } else {
             setIndeterminate(false);
 
-            this.setValue(num);
+            this.setValue((Integer) value);
         }
+        return this;
     }
 
     //@Override
