@@ -173,6 +173,4 @@ public class DragHandler implements DropTargetListener{
         delegate.dragFilePerform(path);
         return true;
     }
-
-
 }

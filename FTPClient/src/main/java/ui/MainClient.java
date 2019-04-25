@@ -5,16 +5,10 @@
 package ui;
 
 import java.awt.*;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -26,7 +20,6 @@ import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.border.*;
 import javax.swing.filechooser.FileSystemView;
-import javax.swing.plaf.*;
 import javax.swing.table.*;
 import com.intellij.uiDesigner.core.*;
 import model.File;
@@ -119,8 +112,6 @@ public class MainClient extends JFrame {
         DropTargetListener handler = new DragHandler(this);
         DropTarget dropTarget = new DropTarget(addFilesLabel,DnDConstants.ACTION_MOVE,
                 handler, true, null );
-
-
 
     }
 
@@ -363,6 +354,46 @@ public class MainClient extends JFrame {
         }
         return null;
     }
+
+    private void showProgress(JTable table, File file, int row) {
+        table.setValueAt(new Integer(0), row, 2);
+        FileProgressRenderer progressBar = new FileProgressRenderer();
+        FileProgressCellEditor fileProgressCellEditor = new FileProgressCellEditor();
+        table.getColumnModel().getColumn(2).setCellRenderer(progressBar);
+        table.getColumnModel().getColumn(2).setCellEditor(fileProgressCellEditor);
+        table.updateUI();
+
+        timer = new Timer(500, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                double value;
+                value = getProgress(file);
+                int num = value < 0 ? -1 : (int)value;
+
+                table.setValueAt(new Integer(num), row, 2);
+
+                if (file.getState() == State.IDLE || progressBar.getValue() >= 100)
+                {
+                    timer.stop();
+                    timer = null;
+                    table.setValueAt(null, row, 2);
+                    table.getColumnModel().getColumn(2).setCellRenderer(null);
+                    table.updateUI();
+                }
+            }
+
+        });
+        timer.start();
+    }
+
+    private void hideProgress(JTable table, File file, int row) {
+        file.setState(State.STOPPING);
+        timer.stop();
+        timer = null;
+        table.setValueAt(null, row, 2);
+        table.getColumnModel().getColumn(2).setCellRenderer(null);
+        table.updateUI();
+    }
     // Util methods - End
 
 
@@ -399,7 +430,8 @@ public class MainClient extends JFrame {
                         msg = "连接失败！";
                         setStatus("未连接");
                     }
-                    JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
+                    JOptionPane.showMessageDialog(null, msg, "提示",
+                            JOptionPane.OK_OPTION, null);
 
                     if (msg.equals("连接成功！") || msg.equals("连接已经建立！") ) {
                         Window window = SwingUtilities.getWindowAncestor(buttonConn);
@@ -431,12 +463,12 @@ public class MainClient extends JFrame {
 
         frame.pack();
         frame.setVisible(true);
-
     }
 
     private void disconnectActionPerformed(ActionEvent e) {
         if (getStatus().equals("未连接")) {
-            JOptionPane.showMessageDialog(null, "未连接到服务器！", "提示", JOptionPane.OK_OPTION, null);
+            JOptionPane.showMessageDialog(null, "未连接到服务器！", "提示",
+                    JOptionPane.OK_OPTION, null);
             return;
         }
 
@@ -451,6 +483,10 @@ public class MainClient extends JFrame {
                 setUploadPath("");
                 clearDataModel(downloadTable, downloadFiles);
                 clearDataModel(uploadTable, uploadFiles);
+                fileSize1.setText("0 MB");
+                fileSize2.setText("0 MB");
+                fileNumber1.setText("0");
+                fileNumber2.setText("0");
                 setStatus("未连接");
             }
         });
@@ -514,10 +550,10 @@ public class MainClient extends JFrame {
 
     private void addFilesMouseClicked(MouseEvent e) {
         if (getStatus().equals("未连接")) {
-            JOptionPane.showMessageDialog(null, "请先连接服务器！", "提示", JOptionPane.OK_OPTION, null);
+            JOptionPane.showMessageDialog(null, "请先连接服务器！", "提示",
+                    JOptionPane.OK_OPTION, null);
             return;
         }
-
         int result;
         final String path;
         JFileChooser fileChooser = new JFileChooser();
@@ -535,7 +571,8 @@ public class MainClient extends JFrame {
                 @Override
                 public void run() {
                     String msg = performUpload(path);
-                    JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
+                    JOptionPane.showMessageDialog(null, msg, "提示",
+                            JOptionPane.OK_OPTION, null);
                 }
             });
         }
@@ -543,16 +580,17 @@ public class MainClient extends JFrame {
 
     public void dragFilePerform(String path){
         if (getStatus().equals("未连接")) {
-            JOptionPane.showMessageDialog(null, "请先连接服务器！", "提示", JOptionPane.OK_OPTION, null);
+            JOptionPane.showMessageDialog(null, "请先连接服务器！", "提示",
+                    JOptionPane.OK_OPTION, null);
             return;
         }
-
         System.out.println("path: "+path);
         threadPool.execute(new Runnable() {
             @Override
             public void run() {
                 String msg = performUpload(path);
-                JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
+                JOptionPane.showMessageDialog(null, msg, "提示",
+                        JOptionPane.OK_OPTION, null);
             }
         });
     }
@@ -584,39 +622,12 @@ public class MainClient extends JFrame {
                     file.setState(State.WORKING);
                     String msg = performDownload(localPath, severPath, file);
                     file.setState(State.IDLE);
-                    JOptionPane.showMessageDialog(null, msg, "提示", JOptionPane.OK_OPTION, null);
+                    JOptionPane.showMessageDialog(null, msg, "提示",
+                            JOptionPane.OK_OPTION, null);
                 }
             });
-
-            downloadTable.setValueAt(new Integer(0), row, 2);
-            FileProgressRenderer progressBar = new FileProgressRenderer();
-            FileProgressCellEditor fileProgressCellEditor = new FileProgressCellEditor();
-            downloadTable.getColumnModel().getColumn(2).setCellRenderer(progressBar);
-            downloadTable.getColumnModel().getColumn(2).setCellEditor(fileProgressCellEditor);
-            downloadTable.updateUI();
-
-            timer = new Timer(500, new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    double value;
-                    value = getProgress(file);
-                    int num = value < 0 ? -1 : (int)value;
-
-                    downloadTable.setValueAt(new Integer(num), row, 2);
-
-                    if (file.getState() == State.IDLE || progressBar.getValue() >= 100)
-                    {
-                        timer.stop();
-                        downloadTable.setValueAt(null, row, 2);
-                        downloadTable.getColumnModel().getColumn(2).setCellRenderer(null);
-                        downloadTable.updateUI();
-                    }
-                }
-
-            });
-            timer.start();
+            showProgress(downloadTable, file, row);
         }
-
     }
 
     public void stopDownload() {
@@ -631,11 +642,7 @@ public class MainClient extends JFrame {
                 System.out.println("进入异常catch");
                 e.printStackTrace();
             }
-            file.setState(State.STOPPING);
-            timer.stop();
-            downloadTable.setValueAt(null, row, 2);
-            downloadTable.getColumnModel().getColumn(2).setCellRenderer(null);
-            downloadTable.updateUI();
+            hideProgress(downloadTable, file, row);
         }
     }
     // UI methods - End

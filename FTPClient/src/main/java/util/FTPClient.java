@@ -1,7 +1,5 @@
 package util;
 
-import com.jformdesigner.S;
-
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
@@ -160,7 +158,8 @@ public class FTPClient {
             if (closing > 0) {
                 String datalink = response.substring(opening + 1, closing);
                 StringTokenizer tokenizer = new StringTokenizer(datalink, ",");
-                dataHost = tokenizer.nextToken() + "." + tokenizer.nextToken() + "." + tokenizer.nextToken() + "." + tokenizer.nextToken();
+                dataHost = tokenizer.nextToken() + "." + tokenizer.nextToken() + "." + tokenizer.nextToken() + "." +
+                        tokenizer.nextToken();
                 dataPort = Integer.parseInt(tokenizer.nextToken()) * 256 + Integer.parseInt(tokenizer.nextToken());
             }
         }catch (Exception e){
@@ -340,5 +339,4 @@ public class FTPClient {
         System.out.println("("+path+")大小："+length);
         return length;
     }
-
 }
