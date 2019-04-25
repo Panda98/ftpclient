@@ -625,6 +625,7 @@ public class MainClient extends JFrame {
         Thread thread = findThread(currentDownloadthread);
         if (thread != null) {
             try {
+                client.close();
                 thread.stop();
             } catch (ThreadDeath e) {
                 System.out.println("进入异常catch");
