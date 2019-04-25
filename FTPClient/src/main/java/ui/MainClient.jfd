@@ -518,7 +518,7 @@ new FormModel {
 				"vAlign": 0
 			} )
 		}, new FormLayoutConstraints( null ) {
-			"location": new java.awt.Point( 65, 645 )
+			"location": new java.awt.Point( 50, 615 )
 			"size": new java.awt.Dimension( 330, 225 )
 		} )
 		add( new FormContainer( "javax.swing.JPopupMenu", new FormLayoutManager( class javax.swing.JPopupMenu ) ) {
@@ -534,7 +534,7 @@ new FormModel {
 				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "disconnectActionPerformed", true ) )
 			} )
 		}, new FormLayoutConstraints( null ) {
-			"location": new java.awt.Point( 450, 705 )
+			"location": new java.awt.Point( 400, 680 )
 			"size": new java.awt.Dimension( 103, 50 )
 		} )
 		addBindingGroup( new FormBindingGroup( class org.jdesktop.beansbinding.BindingGroup ) {
